@@ -1,0 +1,902 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<meta name="description" content="Demo Salesforce Flow Automation — Leandro Picek · Automatizaciones, Lead Scoring con IA y Flow Builder inteligente."/>
+<title>Salesforce Flow Demo · Leandro Picek</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css"/>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0D0F14;
+    --surface: #151820;
+    --surface2: #1C2030;
+    --teal: #1D9E75;
+    --teal-dim: #0F6E56;
+    --teal-bright: #5DCAA5;
+    --text: #E8EAF0;
+    --text-muted: #7A8099;
+    --text-dim: #4A5068;
+    --border: rgba(255,255,255,0.07);
+    --border-teal: rgba(29,158,117,0.3);
+    --radius: 10px;
+    --font: 'Segoe UI', system-ui, sans-serif;
+    --font-mono: 'Fira Code', 'Cascadia Code', 'Consolas', monospace;
+
+    --sf-blue: #0176D3;
+    --sf-blue-light: rgba(1,118,211,0.12);
+    --sf-green: #2E844A;
+    --sf-green-light: rgba(46,132,74,0.12);
+    --sf-orange: #DD5A0E;
+    --sf-orange-light: rgba(221,90,14,0.12);
+    --sf-purple: #7B5EA7;
+    --sf-purple-light: rgba(123,94,167,0.12);
+  }
+
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font);
+    font-size: 15px;
+    line-height: 1.6;
+    min-height: 100vh;
+  }
+
+  /* ── TOP BAR ── */
+  .topbar {
+    background: rgba(13,15,20,0.92);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-bottom: 0.5px solid var(--border);
+    padding: 0 1.5rem;
+    height: 52px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 50;
+  }
+  .topbar-left { display: flex; align-items: center; gap: 10px; }
+  .topbar-back {
+    display: inline-flex; align-items: center; gap: 5px;
+    color: var(--text-muted); text-decoration: none;
+    font-size: 13px; transition: color 0.2s;
+    background: none; border: none; cursor: pointer;
+  }
+  .topbar-back:hover { color: var(--teal-bright); }
+  .topbar-divider { width: 1px; height: 18px; background: var(--border); }
+  .topbar-title {
+    font-size: 13px; font-weight: 500; color: var(--text);
+    display: flex; align-items: center; gap: 6px;
+  }
+  .topbar-badge {
+    font-size: 10px; padding: 2px 8px; border-radius: 99px;
+    background: rgba(29,158,117,0.15); color: var(--teal-bright);
+    border: 0.5px solid var(--border-teal);
+    font-family: var(--font-mono); letter-spacing: 0.04em;
+    display: flex; align-items: center; gap: 4px;
+  }
+  .live-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--teal-bright); animation: pulse 2s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+  .topbar-author { font-size: 12px; color: var(--text-muted); }
+  .topbar-author a { color: var(--teal-bright); text-decoration: none; }
+
+  /* ── HERO STRIP ── */
+  .demo-hero {
+    background: linear-gradient(135deg, #0a1628 0%, #0D0F14 60%);
+    border-bottom: 0.5px solid var(--border);
+    padding: 2rem 1.5rem 1.5rem;
+    display: flex;
+    align-items: flex-start;
+    gap: 2rem;
+    flex-wrap: wrap;
+  }
+  .demo-hero-info { flex: 1; min-width: 260px; }
+  .demo-eyebrow {
+    font-family: var(--font-mono); font-size: 11px; color: var(--teal);
+    letter-spacing: 0.1em; margin-bottom: 8px;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .demo-eyebrow::before { content: ''; width: 16px; height: 1px; background: var(--teal); }
+  .demo-hero h1 { font-size: 1.5rem; font-weight: 700; letter-spacing: -0.02em; margin-bottom: 6px; }
+  .demo-hero p { font-size: 13px; color: var(--text-muted); max-width: 480px; line-height: 1.7; }
+  .demo-tags { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 12px; }
+  .demo-tag {
+    font-size: 11px; font-family: var(--font-mono);
+    padding: 2px 9px; border-radius: 4px;
+    background: rgba(29,158,117,0.1); color: var(--teal-bright);
+    border: 0.5px solid var(--border-teal);
+  }
+  .demo-stats { display: flex; gap: 1.5rem; flex-wrap: wrap; align-items: flex-start; }
+  .demo-stat { text-align: center; }
+  .demo-stat-num { font-size: 1.4rem; font-weight: 700; font-family: var(--font-mono); color: var(--teal-bright); line-height: 1; }
+  .demo-stat-label { font-size: 11px; color: var(--text-muted); margin-top: 3px; }
+
+  /* ── SF APP SHELL ── */
+  .sf-wrap { padding: 1.25rem 1.5rem 3rem; }
+  .sf-app {
+    background: var(--surface);
+    border: 0.5px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    min-height: 600px;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* SF HEADER */
+  .sf-header {
+    background: var(--sf-blue);
+    padding: 9px 16px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-shrink: 0;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .sf-logo { color: white; font-size: 13px; font-weight: 600; display: flex; align-items: center; gap: 6px; }
+  .sf-logo i { font-size: 18px; }
+  .sf-sep { color: rgba(255,255,255,0.3); font-size: 14px; }
+  .sf-nav { display: flex; gap: 2px; }
+  .sf-nav-btn {
+    color: rgba(255,255,255,0.7); font-size: 12px;
+    padding: 4px 10px; border-radius: 4px;
+    cursor: pointer; border: none; background: none;
+    transition: all 0.15s;
+  }
+  .sf-nav-btn:hover, .sf-nav-btn.active { background: rgba(255,255,255,0.15); color: white; }
+  .sf-header-right { margin-left: auto; display: flex; align-items: center; gap: 8px; }
+  .sf-ai-badge {
+    background: rgba(93,202,165,0.2); color: #5DCAA5;
+    font-size: 11px; padding: 3px 10px; border-radius: 99px;
+    display: flex; align-items: center; gap: 5px; border: 0.5px solid rgba(93,202,165,0.3);
+    font-family: var(--font-mono);
+  }
+
+  /* SF BODY */
+  .sf-body { display: flex; flex: 1; overflow: hidden; }
+
+  /* SIDEBAR */
+  .sf-sidebar {
+    width: 210px;
+    flex-shrink: 0;
+    background: var(--bg);
+    border-right: 0.5px solid var(--border);
+    padding: 10px 0;
+    overflow-y: auto;
+  }
+  .sb-section { padding: 8px 14px 2px; font-size: 10px; font-weight: 500; color: var(--text-dim); letter-spacing: 0.08em; text-transform: uppercase; margin-top: 6px; }
+  .sb-item {
+    display: flex; align-items: center; gap: 9px;
+    padding: 7px 14px; font-size: 13px; color: var(--text-muted);
+    cursor: pointer; transition: all 0.15s;
+    border-left: 2px solid transparent;
+    border: none; background: none; width: 100%; text-align: left;
+  }
+  .sb-item:hover { background: var(--surface); color: var(--text); }
+  .sb-item.active { background: rgba(1,118,211,0.1); color: #60AFEE; border-left: 2px solid var(--sf-blue); }
+  .sb-item i { font-size: 15px; flex-shrink: 0; }
+  .sb-count { margin-left: auto; font-size: 10px; padding: 1px 6px; border-radius: 99px; background: var(--surface2); color: var(--text-muted); }
+  .sb-count.red { background: rgba(163,45,45,0.2); color: #F09595; }
+
+  /* MAIN */
+  .sf-main { flex: 1; overflow-y: auto; padding: 16px; background: var(--bg); }
+
+  /* PAGES */
+  .sf-page { display: none; }
+  .sf-page.active { display: block; }
+
+  /* STATS GRID */
+  .stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 16px; }
+  .stat-card {
+    background: var(--surface); border: 0.5px solid var(--border);
+    border-radius: var(--radius); padding: 12px;
+  }
+  .stat-label { font-size: 11px; color: var(--text-muted); margin-bottom: 5px; }
+  .stat-value { font-size: 22px; font-weight: 700; font-family: var(--font-mono); line-height: 1; }
+  .stat-delta { font-size: 11px; margin-top: 5px; display: flex; align-items: center; gap: 3px; }
+  .delta-up { color: #5DCAA5; }
+  .delta-warn { color: #EF9F27; }
+
+  /* SECTION TITLE */
+  .sec-title {
+    font-size: 12px; font-weight: 500; color: var(--text-muted);
+    text-transform: uppercase; letter-spacing: 0.07em;
+    margin-bottom: 10px; display: flex; align-items: center; gap: 6px;
+  }
+
+  /* FLOWS LIST */
+  .flows-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px; }
+  .flow-row {
+    background: var(--surface); border: 0.5px solid var(--border);
+    border-radius: var(--radius); padding: 11px 14px;
+    display: flex; align-items: center; gap: 12px;
+    cursor: pointer; transition: all 0.15s;
+  }
+  .flow-row:hover { border-color: rgba(255,255,255,0.14); }
+  .flow-row.active { border-color: var(--sf-blue); background: rgba(1,118,211,0.07); }
+  .flow-ico {
+    width: 32px; height: 32px; border-radius: 7px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 15px; flex-shrink: 0;
+  }
+  .ico-blue { background: var(--sf-blue-light); color: #60AFEE; }
+  .ico-orange { background: var(--sf-orange-light); color: #F0935A; }
+  .ico-green { background: var(--sf-green-light); color: #5DCAA5; }
+  .ico-purple { background: var(--sf-purple-light); color: #B09DD6; }
+  .flow-name { font-size: 13px; font-weight: 500; color: var(--text); }
+  .flow-sub { font-size: 11px; color: var(--text-muted); margin-top: 1px; }
+  .flow-pill {
+    font-size: 10px; padding: 2px 8px; border-radius: 99px;
+    font-weight: 500; display: flex; align-items: center; gap: 4px;
+  }
+  .pill-active { background: var(--sf-green-light); color: #5DCAA5; }
+  .flow-runs { font-size: 11px; color: var(--text-dim); min-width: 60px; text-align: right; flex-shrink: 0; }
+
+  /* FLOW DETAIL */
+  .flow-detail {
+    background: var(--surface); border: 0.5px solid var(--border);
+    border-radius: var(--radius); padding: 14px;
+  }
+  .detail-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; margin-bottom: 14px; flex-wrap: wrap; }
+  .detail-title { font-size: 14px; font-weight: 600; color: var(--text); }
+  .detail-meta { font-size: 11px; color: var(--text-muted); margin-top: 3px; }
+  .detail-actions { display: flex; gap: 6px; }
+  .btn-sm {
+    display: inline-flex; align-items: center; gap: 5px;
+    padding: 5px 12px; border-radius: 6px;
+    font-size: 12px; font-weight: 500; cursor: pointer;
+    border: 0.5px solid var(--border); background: transparent;
+    color: var(--text-muted); transition: all 0.15s;
+  }
+  .btn-sm:hover { border-color: rgba(255,255,255,0.2); color: var(--text); }
+  .btn-sm.primary { background: var(--sf-blue); color: white; border-color: var(--sf-blue); }
+  .btn-sm.primary:hover { opacity: 0.88; }
+
+  /* STEPS */
+  .steps-list { display: flex; flex-direction: column; gap: 0; }
+  .step { display: flex; gap: 10px; padding: 8px 0; position: relative; }
+  .step-line { position: absolute; left: 13px; top: 32px; bottom: -8px; width: 1px; background: var(--border); }
+  .step-dot {
+    width: 26px; height: 26px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; flex-shrink: 0; margin-top: 2px;
+  }
+  .dot-trigger { background: rgba(1,118,211,0.15); color: #60AFEE; }
+  .dot-cond { background: rgba(221,90,14,0.15); color: #F0935A; }
+  .dot-action { background: rgba(46,132,74,0.15); color: #5DCAA5; }
+  .dot-ai { background: rgba(29,158,117,0.15); color: var(--teal-bright); }
+  .dot-apex { background: rgba(123,94,167,0.15); color: #B09DD6; }
+  .step-content { flex: 1; }
+  .step-kind { font-size: 10px; color: var(--text-dim); letter-spacing: 0.06em; text-transform: uppercase; font-family: var(--font-mono); }
+  .step-name { font-size: 13px; font-weight: 500; color: var(--text); margin: 1px 0; }
+  .step-desc { font-size: 12px; color: var(--text-muted); line-height: 1.55; }
+
+  /* LEADS TABLE */
+  .tbl-wrap { background: var(--surface); border: 0.5px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+  table { width: 100%; border-collapse: collapse; font-size: 12px; }
+  thead th {
+    text-align: left; padding: 8px 12px;
+    font-size: 10px; font-weight: 500; color: var(--text-dim);
+    letter-spacing: 0.07em; text-transform: uppercase;
+    border-bottom: 0.5px solid var(--border); background: var(--surface2);
+  }
+  tbody td { padding: 9px 12px; border-bottom: 0.5px solid var(--border); vertical-align: middle; color: var(--text); }
+  tbody tr:last-child td { border-bottom: none; }
+  tbody tr:hover td { background: var(--surface2); }
+  .pill {
+    display: inline-block; padding: 2px 8px; border-radius: 99px;
+    font-size: 10px; font-weight: 500;
+  }
+  .pill-hot { background: rgba(163,45,45,0.2); color: #F09595; }
+  .pill-warm { background: rgba(221,90,14,0.15); color: #F0935A; }
+  .pill-cold { background: var(--surface2); color: var(--text-muted); }
+  .pill-sql { background: rgba(1,118,211,0.12); color: #60AFEE; }
+  .pill-mql { background: rgba(221,90,14,0.12); color: #F0935A; }
+  .pill-unq { background: var(--surface2); color: var(--text-dim); }
+
+  /* LOGS */
+  .log-list { background: var(--surface); border: 0.5px solid var(--border); border-radius: var(--radius); padding: 4px 14px; }
+  .log-item { display: flex; align-items: flex-start; gap: 10px; padding: 9px 0; border-bottom: 0.5px solid var(--border); }
+  .log-item:last-child { border-bottom: none; }
+  .log-bullet { width: 7px; height: 7px; border-radius: 50%; margin-top: 5px; flex-shrink: 0; }
+  .lb-ok { background: #5DCAA5; }
+  .lb-warn { background: #EF9F27; }
+  .lb-info { background: #60AFEE; }
+  .lb-ai { background: var(--teal-bright); }
+  .log-text { font-size: 12px; color: var(--text); line-height: 1.5; }
+  .log-time { font-size: 10px; color: var(--text-dim); margin-top: 2px; }
+  .ai-tag { font-size: 10px; padding: 1px 6px; border-radius: 4px; background: rgba(29,158,117,0.15); color: var(--teal-bright); margin-left: 6px; font-family: var(--font-mono); }
+
+  /* AI PANEL */
+  .ai-panel {
+    background: var(--surface); border: 0.5px solid var(--border-teal);
+    border-radius: var(--radius); padding: 14px;
+  }
+  .ai-panel-head { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+  .ai-panel-ico {
+    width: 30px; height: 30px; border-radius: 7px;
+    background: rgba(29,158,117,0.15); color: var(--teal-bright);
+    display: flex; align-items: center; justify-content: center; font-size: 15px;
+  }
+  .ai-panel-title { font-size: 13px; font-weight: 500; color: var(--text); }
+  .ai-panel-sub { font-size: 11px; color: var(--text-muted); }
+  .field-label { font-size: 11px; color: var(--text-muted); margin-bottom: 4px; }
+  textarea.ai-ta {
+    width: 100%; padding: 9px 11px;
+    background: var(--bg); border: 0.5px solid var(--border);
+    border-radius: 7px; color: var(--text); font-size: 12px;
+    font-family: var(--font); line-height: 1.55; resize: none;
+    transition: border-color 0.15s;
+  }
+  textarea.ai-ta:focus { outline: none; border-color: var(--teal); }
+  input.ai-inp {
+    width: 100%; padding: 7px 11px;
+    background: var(--bg); border: 0.5px solid var(--border);
+    border-radius: 7px; color: var(--text); font-size: 12px;
+    font-family: var(--font); transition: border-color 0.15s;
+  }
+  input.ai-inp:focus { outline: none; border-color: var(--teal); }
+  .inp-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 10px; }
+  .btn-ai {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 7px 16px; border-radius: 7px;
+    font-size: 13px; font-weight: 500; cursor: pointer;
+    background: var(--teal); color: white; border: none;
+    transition: all 0.2s;
+  }
+  .btn-ai:hover { background: var(--teal-bright); color: #0D0F14; }
+  .btn-ghost {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 7px 14px; border-radius: 7px;
+    font-size: 12px; cursor: pointer;
+    background: transparent; color: var(--text-muted);
+    border: 0.5px solid var(--border); transition: all 0.15s;
+  }
+  .btn-ghost:hover { border-color: rgba(255,255,255,0.18); color: var(--text); }
+  .ai-row { display: flex; gap: 8px; margin-top: 10px; align-items: center; flex-wrap: wrap; }
+  .ai-thinking {
+    display: none; align-items: center; gap: 8px;
+    font-size: 12px; color: var(--text-muted); margin-top: 10px;
+  }
+  .ai-thinking.on { display: flex; }
+  .dots { display: flex; gap: 4px; }
+  .d { width: 6px; height: 6px; border-radius: 50%; background: var(--teal); animation: bonce 1.2s ease-in-out infinite; }
+  .d:nth-child(2){animation-delay:.2s}
+  .d:nth-child(3){animation-delay:.4s}
+  @keyframes bonce{0%,60%,100%{transform:translateY(0)}30%{transform:translateY(-5px)}}
+  .ai-result {
+    display: none; margin-top: 12px;
+    background: var(--bg); border: 0.5px solid var(--border);
+    border-radius: 7px; padding: 12px 14px;
+    font-size: 12px; color: var(--text); line-height: 1.65;
+    white-space: pre-wrap; font-family: var(--font);
+  }
+  .ai-result.on { display: block; }
+  .result-label {
+    font-size: 10px; font-family: var(--font-mono);
+    color: var(--teal); letter-spacing: 0.08em; margin-bottom: 8px;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .result-label::before { content: ''; width: 12px; height: 1px; background: var(--teal); }
+
+  /* FOOTER */
+  footer {
+    border-top: 0.5px solid var(--border);
+    padding: 1.25rem 1.5rem;
+    display: flex; align-items: center; justify-content: space-between;
+    flex-wrap: wrap; gap: 8px;
+  }
+  .footer-left { font-size: 12px; color: var(--text-dim); font-family: var(--font-mono); }
+  .footer-right { display: flex; gap: 8px; }
+  .footer-link {
+    display: inline-flex; align-items: center; gap: 5px;
+    font-size: 12px; color: var(--text-muted); text-decoration: none;
+    padding: 5px 12px; border-radius: 6px;
+    border: 0.5px solid var(--border); transition: all 0.15s;
+  }
+  .footer-link:hover { color: var(--teal-bright); border-color: var(--border-teal); }
+
+  /* RESPONSIVE */
+  @media (max-width: 680px) {
+    .sf-sidebar { width: 48px; }
+    .sb-section, .sb-item span:not(.sb-count), .sb-item i+* { display: none; }
+    .sb-item { justify-content: center; padding: 8px; }
+    .sb-count { display: none; }
+    .stats-row { grid-template-columns: 1fr 1fr; }
+    .inp-grid { grid-template-columns: 1fr; }
+    .flow-runs { display: none; }
+    .demo-hero { padding: 1.25rem 1rem; }
+    .sf-wrap { padding: 1rem 1rem 2rem; }
+  }
+</style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<nav class="topbar" aria-label="Navegación demo">
+  <div class="topbar-left">
+    <a href="index.html" class="topbar-back">
+      <i class="ti ti-arrow-left" aria-hidden="true"></i> Portfolio
+    </a>
+    <div class="topbar-divider"></div>
+    <div class="topbar-title">
+      <i class="ti ti-cloud" aria-hidden="true" style="color:var(--sf-blue);font-size:16px;"></i>
+      Salesforce Flow Automation
+    </div>
+    <div class="topbar-badge">
+      <div class="live-dot"></div> IA activa
+    </div>
+  </div>
+  <div class="topbar-author">por <a href="index.html">Leandro Picek</a></div>
+</nav>
+
+<!-- HERO STRIP -->
+<div class="demo-hero">
+  <div class="demo-hero-info">
+    <div class="demo-eyebrow">demo funcional · salesforce</div>
+    <h1>Flow Automation + AI Integration</h1>
+    <p>Demo interactiva de automatizaciones en Salesforce: Flows record-triggered, Lead Scoring con IA y un Flow Builder que genera estructuras técnicas desde lenguaje natural.</p>
+    <div class="demo-tags">
+      <span class="demo-tag">Apex</span>
+      <span class="demo-tag">LWC</span>
+      <span class="demo-tag">Flow Builder</span>
+      <span class="demo-tag">SOQL</span>
+      <span class="demo-tag">Sales Cloud</span>
+      <span class="demo-tag">Claude API</span>
+    </div>
+  </div>
+  <div class="demo-stats">
+    <div class="demo-stat"><div class="demo-stat-num">4</div><div class="demo-stat-label">Flows activos</div></div>
+    <div class="demo-stat"><div class="demo-stat-num">247</div><div class="demo-stat-label">Ejecuciones hoy</div></div>
+    <div class="demo-stat"><div class="demo-stat-num">98.4%</div><div class="demo-stat-label">Tasa de éxito</div></div>
+    <div class="demo-stat"><div class="demo-stat-num">2</div><div class="demo-stat-label">Módulos IA</div></div>
+  </div>
+</div>
+
+<!-- APP -->
+<div class="sf-wrap">
+<div class="sf-app">
+
+  <!-- SF HEADER -->
+  <div class="sf-header">
+    <div class="sf-logo">
+      <i class="ti ti-cloud" aria-hidden="true"></i>
+      Salesforce
+    </div>
+    <span class="sf-sep">|</span>
+    <div class="sf-nav">
+      <button class="sf-nav-btn active">Flow Automation</button>
+      <button class="sf-nav-btn">Process Builder</button>
+      <button class="sf-nav-btn">Apex Triggers</button>
+    </div>
+    <div class="sf-header-right">
+      <div class="sf-ai-badge"><div class="live-dot"></div> IA integrada</div>
+    </div>
+  </div>
+
+  <div class="sf-body">
+
+    <!-- SIDEBAR -->
+    <aside class="sf-sidebar" aria-label="Menú lateral">
+      <div class="sb-section">Automatizaciones</div>
+      <button class="sb-item active" onclick="goPage(this,'flows')" aria-label="Flows activos">
+        <i class="ti ti-arrows-transfer-down" aria-hidden="true"></i>
+        <span>Flows activos</span>
+        <span class="sb-count">4</span>
+      </button>
+      <button class="sb-item" onclick="goPage(this,'leads')" aria-label="Leads">
+        <i class="ti ti-user-plus" aria-hidden="true"></i>
+        <span>Leads</span>
+        <span class="sb-count red">3</span>
+      </button>
+      <button class="sb-item" onclick="goPage(this,'logs')" aria-label="Registro ejecuciones">
+        <i class="ti ti-list-check" aria-hidden="true"></i>
+        <span>Registro ejecuciones</span>
+      </button>
+      <div class="sb-section">Herramientas IA</div>
+      <button class="sb-item" onclick="goPage(this,'ai-builder')" aria-label="Flow Builder IA">
+        <i class="ti ti-brain" aria-hidden="true"></i>
+        <span>Flow Builder IA</span>
+      </button>
+      <button class="sb-item" onclick="goPage(this,'ai-score')" aria-label="Lead Scoring IA">
+        <i class="ti ti-chart-bar" aria-hidden="true"></i>
+        <span>Lead Scoring IA</span>
+      </button>
+    </aside>
+
+    <!-- MAIN -->
+    <main class="sf-main">
+
+      <!-- ═══ PAGE: FLOWS ═══ -->
+      <div class="sf-page active" id="page-flows" aria-label="Flows activos">
+        <div class="stats-row">
+          <div class="stat-card">
+            <div class="stat-label">Flows activos</div>
+            <div class="stat-value" style="color:#60AFEE">4</div>
+            <div class="stat-delta delta-up"><i class="ti ti-arrow-up" style="font-size:10px;" aria-hidden="true"></i> 1 nuevo hoy</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Ejecuciones hoy</div>
+            <div class="stat-value">247</div>
+            <div class="stat-delta delta-up"><i class="ti ti-arrow-up" style="font-size:10px;" aria-hidden="true"></i> +12%</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Tasa de éxito</div>
+            <div class="stat-value" style="color:#5DCAA5">98.4%</div>
+            <div class="stat-delta delta-up">Sin errores hoy</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Leads procesados</div>
+            <div class="stat-value">83</div>
+            <div class="stat-delta delta-warn"><i class="ti ti-clock" style="font-size:10px;" aria-hidden="true"></i> 3 pendientes</div>
+          </div>
+        </div>
+
+        <div class="sec-title"><i class="ti ti-arrows-transfer-down" aria-hidden="true"></i> Flows configurados</div>
+        <div class="flows-list">
+          <div class="flow-row active" onclick="pickFlow(this,0)" role="button" tabindex="0">
+            <div class="flow-ico ico-blue"><i class="ti ti-user-check" aria-hidden="true"></i></div>
+            <div style="flex:1">
+              <div class="flow-name">Lead Qualification Flow</div>
+              <div class="flow-sub">Record-Triggered · Objeto: Lead</div>
+            </div>
+            <div class="flow-pill pill-active"><span style="width:5px;height:5px;border-radius:50%;background:#5DCAA5;display:inline-block;"></span> Activo</div>
+            <div class="flow-runs">134 runs hoy</div>
+          </div>
+          <div class="flow-row" onclick="pickFlow(this,1)" role="button" tabindex="0">
+            <div class="flow-ico ico-orange"><i class="ti ti-mail-forward" aria-hidden="true"></i></div>
+            <div style="flex:1">
+              <div class="flow-name">Escalation Auto-Notify</div>
+              <div class="flow-sub">Scheduled · Objeto: Case</div>
+            </div>
+            <div class="flow-pill pill-active"><span style="width:5px;height:5px;border-radius:50%;background:#5DCAA5;display:inline-block;"></span> Activo</div>
+            <div class="flow-runs">58 runs hoy</div>
+          </div>
+          <div class="flow-row" onclick="pickFlow(this,2)" role="button" tabindex="0">
+            <div class="flow-ico ico-green"><i class="ti ti-currency-dollar" aria-hidden="true"></i></div>
+            <div style="flex:1">
+              <div class="flow-name">Opportunity Stage Update</div>
+              <div class="flow-sub">Record-Triggered · Objeto: Opportunity</div>
+            </div>
+            <div class="flow-pill pill-active"><span style="width:5px;height:5px;border-radius:50%;background:#5DCAA5;display:inline-block;"></span> Activo</div>
+            <div class="flow-runs">55 runs hoy</div>
+          </div>
+          <div class="flow-row" onclick="pickFlow(this,3)" role="button" tabindex="0">
+            <div class="flow-ico ico-purple"><i class="ti ti-brain" aria-hidden="true"></i></div>
+            <div style="flex:1">
+              <div class="flow-name">AI Lead Scoring Flow</div>
+              <div class="flow-sub">Record-Triggered · Objeto: Lead · <span style="color:var(--teal-bright);font-weight:500;">IA integrada</span></div>
+            </div>
+            <div class="flow-pill pill-active"><span style="width:5px;height:5px;border-radius:50%;background:#5DCAA5;display:inline-block;"></span> Activo</div>
+            <div class="flow-runs">Nuevo</div>
+          </div>
+        </div>
+
+        <div class="flow-detail">
+          <div class="detail-head">
+            <div>
+              <div class="detail-title" id="dtitle">Lead Qualification Flow</div>
+              <div class="detail-meta" id="dmeta">Record-Triggered · Creado 15/05/2025 · v3.2 · API: Lead__c</div>
+            </div>
+            <div class="detail-actions">
+              <button class="btn-sm"><i class="ti ti-player-play" aria-hidden="true"></i> Ejecutar</button>
+              <button class="btn-sm primary"><i class="ti ti-edit" aria-hidden="true"></i> Editar</button>
+            </div>
+          </div>
+          <div class="steps-list" id="dsteps"></div>
+        </div>
+      </div>
+
+      <!-- ═══ PAGE: LEADS ═══ -->
+      <div class="sf-page" id="page-leads" aria-label="Leads">
+        <div class="sec-title" style="margin-bottom:12px;"><i class="ti ti-user-plus" aria-hidden="true"></i> Leads procesados por Flow</div>
+        <div class="tbl-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Nombre</th>
+                <th>Empresa</th>
+                <th>Score IA</th>
+                <th>Estado</th>
+                <th>Etapa</th>
+                <th>Asignado</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>María González</strong><br><span style="font-size:10px;color:var(--text-muted);">mgonzalez@techcorp.com</span></td>
+                <td>TechCorp SA</td>
+                <td><span class="pill pill-hot">🔥 92 — Hot</span></td>
+                <td><span style="color:#5DCAA5;font-size:11px;"><i class="ti ti-check" aria-hidden="true"></i> Calificado</span></td>
+                <td><span class="pill pill-sql">SQL</span></td>
+                <td>Carlos R.</td>
+              </tr>
+              <tr>
+                <td><strong>Juan Pérez</strong><br><span style="font-size:10px;color:var(--text-muted);">jperez@innovar.io</span></td>
+                <td>Innovar.io</td>
+                <td><span class="pill pill-warm">🟡 67 — Warm</span></td>
+                <td><span style="color:#EF9F27;font-size:11px;"><i class="ti ti-clock" aria-hidden="true"></i> Nurturing</span></td>
+                <td><span class="pill pill-mql">MQL</span></td>
+                <td>Auto (Flow)</td>
+              </tr>
+              <tr>
+                <td><strong>Ana Torres</strong><br><span style="font-size:10px;color:var(--text-muted);">atorres@globalmed.com</span></td>
+                <td>GlobalMed</td>
+                <td><span class="pill pill-hot">🔥 88 — Hot</span></td>
+                <td><span style="color:#5DCAA5;font-size:11px;"><i class="ti ti-check" aria-hidden="true"></i> Calificado</span></td>
+                <td><span class="pill pill-sql">SQL</span></td>
+                <td>Laura M.</td>
+              </tr>
+              <tr>
+                <td><strong>Roberto Lima</strong><br><span style="font-size:10px;color:var(--text-muted);">rlima@startup.ar</span></td>
+                <td>Startup AR</td>
+                <td><span class="pill pill-cold">❄ 34 — Cold</span></td>
+                <td><span style="color:var(--text-dim);font-size:11px;"><i class="ti ti-minus" aria-hidden="true"></i> Descartado</span></td>
+                <td><span class="pill pill-unq">Unqualified</span></td>
+                <td>—</td>
+              </tr>
+              <tr>
+                <td><strong>Sofía Ramírez</strong><br><span style="font-size:10px;color:var(--text-muted);">sramirez@edu.unc.edu</span></td>
+                <td>UNC</td>
+                <td><span class="pill pill-warm">🟡 71 — Warm</span></td>
+                <td><span style="color:#60AFEE;font-size:11px;"><i class="ti ti-refresh" aria-hidden="true"></i> Procesando</span></td>
+                <td><span class="pill pill-mql">MQL</span></td>
+                <td>Auto (Flow)</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ═══ PAGE: LOGS ═══ -->
+      <div class="sf-page" id="page-logs" aria-label="Registro de ejecuciones">
+        <div class="sec-title" style="margin-bottom:12px;"><i class="ti ti-list-check" aria-hidden="true"></i> Registro de ejecuciones recientes</div>
+        <div class="log-list">
+          <div class="log-item"><div class="log-bullet lb-ai"></div><div><div class="log-text">AI Lead Scoring Flow ejecutado para <strong>Sofía Ramírez</strong> → Score: 71<span class="ai-tag">IA</span></div><div class="log-time">hace 2 min</div></div></div>
+          <div class="log-item"><div class="log-bullet lb-ok"></div><div><div class="log-text">Lead Qualification Flow: <strong>Ana Torres</strong> calificada como SQL, asignada a Laura M.</div><div class="log-time">hace 8 min</div></div></div>
+          <div class="log-item"><div class="log-bullet lb-warn"></div><div><div class="log-text">Escalation Auto-Notify: Case #00472 sin respuesta &gt;24h → Email enviado a supervisor</div><div class="log-time">hace 15 min</div></div></div>
+          <div class="log-item"><div class="log-bullet lb-ok"></div><div><div class="log-text">Opportunity Stage Update: Opp <strong>TechCorp — Enterprise</strong> avanzó a Negotiation</div><div class="log-time">hace 22 min</div></div></div>
+          <div class="log-item"><div class="log-bullet lb-ai"></div><div><div class="log-text">AI Lead Scoring Flow ejecutado para <strong>Juan Pérez</strong> → Score: 67, enviado a nurturing<span class="ai-tag">IA</span></div><div class="log-time">hace 31 min</div></div></div>
+          <div class="log-item"><div class="log-bullet lb-ok"></div><div><div class="log-text">Lead Qualification Flow: <strong>Roberto Lima</strong> descartado (score &lt;40)</div><div class="log-time">hace 45 min</div></div></div>
+          <div class="log-item"><div class="log-bullet lb-info"></div><div><div class="log-text">Flow Builder IA generó nuevo draft: <strong>"Churn Prevention Flow"</strong> — 5 pasos</div><div class="log-time">hace 1h</div></div></div>
+          <div class="log-item"><div class="log-bullet lb-ai"></div><div><div class="log-text">AI Lead Scoring Flow ejecutado para <strong>María González</strong> → Score: 92, asignada a Carlos R.<span class="ai-tag">IA</span></div><div class="log-time">hace 1h 12min</div></div></div>
+        </div>
+      </div>
+
+      <!-- ═══ PAGE: AI FLOW BUILDER ═══ -->
+      <div class="sf-page" id="page-ai-builder" aria-label="Flow Builder con IA">
+        <div class="sec-title" style="margin-bottom:12px;"><i class="ti ti-brain" aria-hidden="true" style="color:var(--teal-bright);"></i> Flow Builder con IA — generá flows desde lenguaje natural</div>
+        <div class="ai-panel">
+          <div class="ai-panel-head">
+            <div class="ai-panel-ico"><i class="ti ti-sparkles" aria-hidden="true"></i></div>
+            <div>
+              <div class="ai-panel-title">Describí tu automatización en español</div>
+              <div class="ai-panel-sub">La IA genera la estructura técnica del Flow con triggers, condiciones, acciones y consideraciones de Salesforce</div>
+            </div>
+          </div>
+          <div class="field-label">Describí qué querés automatizar</div>
+          <textarea class="ai-ta" id="fb-input" rows="4" placeholder="Ej: Cuando un lead llega con cargo Director o VP y empresa con +500 empleados, asignarlo automáticamente al equipo enterprise y notificar al gerente de ventas con un resumen del lead..."></textarea>
+          <div class="ai-row">
+            <button class="btn-ai" onclick="runFlowBuilder()"><i class="ti ti-sparkles" aria-hidden="true"></i> Generar Flow</button>
+            <button class="btn-ghost" onclick="document.getElementById('fb-input').value='Cuando un lead se crea con Lead Source = Web y país = Argentina, esperar 10 minutos, enviar email de bienvenida personalizado y si no abre el email en 48hs crear una tarea para el SDR encargado'">
+              <i class="ti ti-bulb" aria-hidden="true"></i> Cargar ejemplo
+            </button>
+          </div>
+          <div class="ai-thinking" id="fb-thinking"><div class="dots"><div class="d"></div><div class="d"></div><div class="d"></div></div><span>Analizando requerimiento y generando estructura del Flow...</span></div>
+          <div class="ai-result" id="fb-result"><div class="result-label">Respuesta IA · Salesforce Flow Architect</div><div id="fb-text"></div></div>
+        </div>
+      </div>
+
+      <!-- ═══ PAGE: AI LEAD SCORING ═══ -->
+      <div class="sf-page" id="page-ai-score" aria-label="Lead Scoring con IA">
+        <div class="sec-title" style="margin-bottom:12px;"><i class="ti ti-chart-bar" aria-hidden="true" style="color:var(--teal-bright);"></i> Lead Scoring IA — analizá un lead con inteligencia artificial</div>
+        <div class="ai-panel">
+          <div class="ai-panel-head">
+            <div class="ai-panel-ico"><i class="ti ti-user-search" aria-hidden="true"></i></div>
+            <div>
+              <div class="ai-panel-title">Ingresá los datos del lead</div>
+              <div class="ai-panel-sub">La IA evalúa el potencial del lead y recomienda la acción que debe ejecutar el Flow de Salesforce</div>
+            </div>
+          </div>
+          <div class="inp-grid">
+            <div>
+              <div class="field-label">Nombre y cargo</div>
+              <input class="ai-inp" id="sc-name" type="text" placeholder="Ej: Diego Martínez, CTO">
+            </div>
+            <div>
+              <div class="field-label">Empresa y tamaño</div>
+              <input class="ai-inp" id="sc-company" type="text" placeholder="Ej: Fintech SA, 200 empleados">
+            </div>
+            <div>
+              <div class="field-label">Industria</div>
+              <input class="ai-inp" id="sc-industry" type="text" placeholder="Ej: Tecnología financiera B2B">
+            </div>
+            <div>
+              <div class="field-label">Comportamiento / interacciones</div>
+              <input class="ai-inp" id="sc-behavior" type="text" placeholder="Ej: Abrió 3 emails, visitó pricing">
+            </div>
+          </div>
+          <div class="ai-row">
+            <button class="btn-ai" onclick="runScoring()"><i class="ti ti-chart-bar" aria-hidden="true"></i> Analizar Lead</button>
+            <button class="btn-ghost" onclick="fillScoreExample()"><i class="ti ti-bulb" aria-hidden="true"></i> Cargar ejemplo</button>
+          </div>
+          <div class="ai-thinking" id="sc-thinking"><div class="dots"><div class="d"></div><div class="d"></div><div class="d"></div></div><span>Evaluando perfil del lead con criterios de calificación...</span></div>
+          <div class="ai-result" id="sc-result"><div class="result-label">Respuesta IA · Lead Scoring Engine</div><div id="sc-text"></div></div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+</div>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-left">salesforce demo · leandro picek · <span id="yr"></span></div>
+  <div class="footer-right">
+    <a href="index.html" class="footer-link"><i class="ti ti-arrow-left" aria-hidden="true"></i> Volver al portfolio</a>
+    <a href="mailto:leandro.picek@gmail.com" class="footer-link"><i class="ti ti-mail" aria-hidden="true"></i> Contacto</a>
+  </div>
+</footer>
+
+<script>
+document.getElementById('yr').textContent = new Date().getFullYear();
+
+/* ── FLOWS DATA ── */
+const FLOWS = [
+  {
+    title: 'Lead Qualification Flow',
+    meta: 'Record-Triggered · Creado 15/05/2025 · v3.2 · API: Lead__c',
+    steps: [
+      {cls:'dot-trigger',icon:'ti-bolt',kind:'Trigger',name:'Lead creado o modificado',desc:'Se activa al crear un Lead o actualizar el campo Status a "Nuevo". Criterio: LeadSource != NULL.'},
+      {cls:'dot-cond',icon:'ti-filter',kind:'Condición',name:'¿Cumple criterios mínimos?',desc:'Decision: Email != NULL AND Company != NULL AND Phone != NULL. Si no cumple → rama "Incompleto" → tarea para SDR.'},
+      {cls:'dot-ai',icon:'ti-brain',kind:'IA',name:'AI Scoring — Clasificación automática',desc:'Apex Callout al servicio de IA. Retorna score 0–100 y categoría Hot/Warm/Cold. Actualiza campo Lead_Score__c.'},
+      {cls:'dot-cond',icon:'ti-git-branch',kind:'Condición',name:'Enrutar por score',desc:'Score ≥ 80 → Equipo Enterprise + notificación. Score 40–79 → Nurturing automático. Score &lt; 40 → Unqualified.'},
+      {cls:'dot-action',icon:'ti-send',kind:'Acción',name:'Notificar y asignar',desc:'Send Email Alert al owner. Create Task a 24hs. Update Record: Stage = "Qualified" o "Nurturing".'},
+    ]
+  },
+  {
+    title: 'Escalation Auto-Notify',
+    meta: 'Scheduled Flow · Corre cada 60 min · Objeto: Case · v1.4',
+    steps: [
+      {cls:'dot-trigger',icon:'ti-clock',kind:'Trigger',name:'Scheduled: cada 60 minutos',desc:'Flow programado que revisa el estado de todos los Cases abiertos en el sistema cada hora.'},
+      {cls:'dot-cond',icon:'ti-filter',kind:'Condición SOQL',name:'Cases sin respuesta +24hs',desc:'SELECT Id FROM Case WHERE Status = "Open" AND LastModifiedDate &lt; LAST_N_HOURS:24. Obtiene casos críticos.'},
+      {cls:'dot-action',icon:'ti-mail',kind:'Acción',name:'Email Alert al supervisor',desc:'Loop por cada Case: Email Alert al Owner y a su Manager. Escala prioridad a "High".'},
+      {cls:'dot-action',icon:'ti-bell',kind:'Acción',name:'Crear tarea urgente',desc:'Create Task: "ESCALADO: Responder Case #{Id}" con fecha = NOW. Asignada al Owner del caso.'},
+    ]
+  },
+  {
+    title: 'Opportunity Stage Update',
+    meta: 'Record-Triggered · Objeto: Opportunity · v2.1 · Criterio: Amount > 0',
+    steps: [
+      {cls:'dot-trigger',icon:'ti-bolt',kind:'Trigger',name:'Opportunity modificada',desc:'Se activa al crear o modificar una Opportunity. Condición: Amount > 0 AND Stage != Closed.'},
+      {cls:'dot-cond',icon:'ti-git-branch',kind:'Condición',name:'Evaluar progreso',desc:'Si Probability ≥ 75 Y cierre en próximos 30 días → candidata a Negotiation.'},
+      {cls:'dot-action',icon:'ti-currency-dollar',kind:'Acción',name:'Actualizar etapa y notificar',desc:'Update Record: StageName = "Negotiation". Custom Notification al Account Executive. Recordatorio a 7 días.'},
+    ]
+  },
+  {
+    title: 'AI Lead Scoring Flow',
+    meta: 'Record-Triggered · Objeto: Lead · v1.0 · IA integrada vía Apex Callout',
+    steps: [
+      {cls:'dot-trigger',icon:'ti-bolt',kind:'Trigger',name:'Lead creado (cualquier fuente)',desc:'Corre al crear cualquier Lead. Sin filtro de entrada: garantiza scoring consistente para todos.'},
+      {cls:'dot-apex',icon:'ti-code',kind:'Apex Action',name:'Invocar LeadScoringService',desc:'Llama a clase Apex @InvocableMethod LeadScoringService.scoreLeads(). Pasa Id del Lead. Realiza callout a API de IA.'},
+      {cls:'dot-ai',icon:'ti-brain',kind:'IA',name:'Análisis y scoring con IA',desc:'La IA analiza cargo, industria, empresa, tamaño y comportamiento. Retorna score y justificación textual.'},
+      {cls:'dot-cond',icon:'ti-git-branch',kind:'Condición',name:'Aplicar lógica de negocio',desc:'Score ≥ 80: IsQualified__c = true, Owner = Enterprise. 40-79: Nurturing. &lt; 40: Status = Unqualified.'},
+      {cls:'dot-action',icon:'ti-check',kind:'Acción',name:'Actualizar Lead + log auditoría',desc:'Update Record con campos calculados. Log en Flow_Execution_Log__c. Notification al manager si score ≥ 90.'},
+    ]
+  }
+];
+
+function renderFlow(idx) {
+  const f = FLOWS[idx];
+  document.getElementById('dtitle').textContent = f.title;
+  document.getElementById('dmeta').textContent = f.meta;
+  document.getElementById('dsteps').innerHTML = f.steps.map((s,i) => `
+    <div class="step">
+      ${i < f.steps.length-1 ? '<div class="step-line"></div>' : ''}
+      <div class="step-dot ${s.cls}"><i class="ti ${s.icon}" aria-hidden="true" style="font-size:12px;"></i></div>
+      <div class="step-content">
+        <div class="step-kind">${s.kind}</div>
+        <div class="step-name">${s.name}</div>
+        <div class="step-desc">${s.desc}</div>
+      </div>
+    </div>
+  `).join('');
+}
+renderFlow(0);
+
+function pickFlow(el, idx) {
+  document.querySelectorAll('.flow-row').forEach(r => r.classList.remove('active'));
+  el.classList.add('active');
+  renderFlow(idx);
+}
+
+function goPage(btn, id) {
+  document.querySelectorAll('.sb-item').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('.sf-page').forEach(p => p.classList.remove('active'));
+  document.getElementById('page-' + id).classList.add('active');
+}
+
+/* ── CLAUDE API ── */
+async function callClaude(systemPrompt, userPrompt) {
+  const res = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      model: 'claude-sonnet-4-20250514',
+      max_tokens: 1000,
+      system: systemPrompt,
+      messages: [{ role: 'user', content: userPrompt }]
+    })
+  });
+  const data = await res.json();
+  return data.content?.map(b => b.type === 'text' ? b.text : '').join('') || 'Error al contactar la API.';
+}
+
+async function runFlowBuilder() {
+  const desc = document.getElementById('fb-input').value.trim();
+  if (!desc) { document.getElementById('fb-input').focus(); return; }
+  const thinking = document.getElementById('fb-thinking');
+  const result = document.getElementById('fb-result');
+  const text = document.getElementById('fb-text');
+  thinking.classList.add('on');
+  result.classList.remove('on');
+  text.textContent = '';
+  try {
+    const out = await callClaude(
+      `Sos un arquitecto Salesforce Senior. Respondés siempre en español, de forma clara y estructurada con terminología real de Salesforce (Flow Builder, Apex, SOQL, LWC, Record-Triggered Flow, Scheduled Flow, Governor Limits, Bulkification, etc). Tus respuestas son técnicamente precisas y concisas.`,
+      `Diseñá la estructura de un Salesforce Flow para esta automatización:\n\n"${desc}"\n\nRespondé con:\n1. TIPO DE FLOW (Record-Triggered / Scheduled / Screen Flow)\n2. OBJETO SALESFORCE principal\n3. TRIGGER (criterio de activación exacto con campos estándar)\n4. PASOS DEL FLOW (máx 5-6, indicando: tipo — Decision / Action / Loop / Assignment / Apex Action / Get Records)\n5. CAMPOS SOQL relevantes si aplica\n6. CONSIDERACIONES TÉCNICAS (bulkification, error handling, governor limits)\n\nUsá nombres de campos Salesforce estándar cuando sea posible.`
+    );
+    thinking.classList.remove('on');
+    text.textContent = out;
+    result.classList.add('on');
+  } catch(e) {
+    thinking.classList.remove('on');
+    text.textContent = 'Error al conectar con la API. Verificá la conexión e intentá de nuevo.';
+    result.classList.add('on');
+  }
+}
+
+async function runScoring() {
+  const name = document.getElementById('sc-name').value.trim();
+  const company = document.getElementById('sc-company').value.trim();
+  const industry = document.getElementById('sc-industry').value.trim();
+  const behavior = document.getElementById('sc-behavior').value.trim();
+  if (!name && !company) { document.getElementById('sc-name').focus(); return; }
+  const thinking = document.getElementById('sc-thinking');
+  const result = document.getElementById('sc-result');
+  const text = document.getElementById('sc-text');
+  thinking.classList.add('on');
+  result.classList.remove('on');
+  text.textContent = '';
+  try {
+    const out = await callClaude(
+      `Sos el motor de Lead Scoring de Salesforce. Analizás leads y devolvés scores, categorías y recomendaciones de acción para Flows de Salesforce. Respondés siempre en español, con formato claro y etiquetas en mayúscula.`,
+      `Analizá este lead y devolvé un score y recomendación de acción en el Flow:\n\nNombre y cargo: ${name || 'No especificado'}\nEmpresa y tamaño: ${company || 'No especificado'}\nIndustria: ${industry || 'No especificada'}\nComportamiento/interacciones: ${behavior || 'Sin datos'}\n\nRespondé con:\nSCORE: [número 0-100]\nCATEGORÍA: [Hot 🔥 / Warm 🟡 / Cold ❄]\nACCIÓN EN EL FLOW: [qué debe ejecutar el Flow con este lead]\nJUSTIFICACIÓN: [2-3 factores principales que explican el score]\nPRÓXIMO PASO: [acción concreta para el equipo de ventas]`
+    );
+    thinking.classList.remove('on');
+    text.textContent = out;
+    result.classList.add('on');
+  } catch(e) {
+    thinking.classList.remove('on');
+    text.textContent = 'Error al conectar con la API. Verificá la conexión e intentá de nuevo.';
+    result.classList.add('on');
+  }
+}
+
+function fillScoreExample() {
+  document.getElementById('sc-name').value = 'Diego Martínez, CTO';
+  document.getElementById('sc-company').value = 'Fintech SA, 200 empleados';
+  document.getElementById('sc-industry').value = 'Tecnología financiera (B2B SaaS)';
+  document.getElementById('sc-behavior').value = 'Abrió 3 emails, visitó página de pricing 2 veces, descargó whitepaper técnico';
+}
+</script>
+</body>
+</html>
