@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<meta name="description" content="Leandro Picek — Desarrollador Full Stack especialista en Oracle, PL/SQL, PHP y Python. Posadas, Misiones, Argentina."/>
+<meta name="author" content="Leandro Gustavo Picek"/>
+<meta property="og:title" content="Leandro Picek · Full Stack Developer"/>
+<meta property="og:description" content="+5 años en sistemas de alta transaccionalidad. Oracle · PL/SQL · PHP · Python."/>
+<meta property="og:type" content="website"/>
+<title>Leandro Picek · Full Stack Developer</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css"/>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #0D0F14;
+    --surface: #151820;
+    --surface2: #1C2030;
+    --teal: #1D9E75;
+    --teal-dim: #0F6E56;
+    --teal-bright: #5DCAA5;
+    --text: #E8EAF0;
+    --text-muted: #7A8099;
+    --text-dim: #4A5068;
+    --border: rgba(255,255,255,0.07);
+    --border-teal: rgba(29,158,117,0.3);
+    --radius: 10px;
+    --font: 'Segoe UI', system-ui, sans-serif;
+    --font-mono: 'Fira Code', 'Cascadia Code', 'Consolas', monospace;
+  }
+  html { scroll-behavior: smooth; }
+  body { background: var(--bg); color: var(--text); font-family: var(--font); font-size: 15px; line-height: 1.7; overflow-x: hidden; }
+
+  /* NAV */
+  nav {
+    position: sticky; top: 0; z-index: 100;
+    background: rgba(13,15,20,0.88);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-bottom: 0.5px solid var(--border);
+    padding: 0 2rem; height: 56px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .nav-logo { font-family: var(--font-mono); font-size: 14px; color: var(--teal-bright); letter-spacing: 0.02em; text-decoration: none; }
+  .nav-links { display: flex; gap: 1.5rem; }
+  .nav-links a { color: var(--text-muted); text-decoration: none; font-size: 13px; transition: color 0.2s; }
+  .nav-links a:hover { color: var(--teal-bright); }
+  .nav-mobile-btn { display: none; background: none; border: none; color: var(--text-muted); font-size: 22px; cursor: pointer; }
+
+  /* SECTIONS */
+  section { padding: 5rem 2rem; max-width: 900px; margin: 0 auto; }
+
+  /* HERO */
+  #hero {
+    min-height: 92vh; display: flex; flex-direction: column;
+    justify-content: center; gap: 1.5rem;
+    padding: 4rem 2rem 5rem; max-width: 900px; margin: 0 auto;
+  }
+  .hero-eyebrow { font-family: var(--font-mono); font-size: 13px; color: var(--teal); letter-spacing: 0.08em; display: flex; align-items: center; gap: 8px; }
+  .hero-eyebrow::before { content: ''; display: inline-block; width: 24px; height: 1px; background: var(--teal); }
+  .hero-name { font-size: clamp(2.6rem, 7vw, 5rem); font-weight: 700; line-height: 1.05; letter-spacing: -0.03em; }
+  .hero-title-wrap { font-family: var(--font-mono); font-size: clamp(0.95rem, 2.2vw, 1.3rem); color: var(--text-muted); height: 2em; display: flex; align-items: center; }
+  #typed-text { color: var(--teal-bright); }
+  .cursor { display: inline-block; width: 2px; height: 1.1em; background: var(--teal-bright); margin-left: 3px; animation: blink 1s step-end infinite; vertical-align: middle; }
+  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+  .hero-desc { font-size: 1rem; color: var(--text-muted); max-width: 540px; line-height: 1.8; }
+  .hero-desc strong { color: var(--teal-bright); font-weight: 500; }
+  .hero-actions { display: flex; gap: 1rem; flex-wrap: wrap; margin-top: 0.5rem; }
+  .hero-stats { display: flex; gap: 2.5rem; flex-wrap: wrap; margin-top: 1rem; padding-top: 2rem; border-top: 0.5px solid var(--border); }
+  .stat-num { font-size: 1.8rem; font-weight: 700; color: var(--teal-bright); font-family: var(--font-mono); line-height: 1; }
+  .stat-label { font-size: 12px; color: var(--text-muted); margin-top: 4px; }
+
+  /* BUTTONS */
+  .btn { display: inline-flex; align-items: center; gap: 8px; padding: 10px 22px; border-radius: var(--radius); font-size: 14px; font-weight: 500; cursor: pointer; text-decoration: none; transition: all 0.2s; border: 1px solid transparent; }
+  .btn-primary { background: var(--teal); color: #fff; border-color: var(--teal); }
+  .btn-primary:hover { background: var(--teal-bright); border-color: var(--teal-bright); color: #0D0F14; }
+  .btn-outline { background: transparent; color: var(--text); border-color: var(--border-teal); }
+  .btn-outline:hover { border-color: var(--teal); color: var(--teal-bright); }
+
+  /* SECTION HEADER */
+  .section-header { margin-bottom: 2.5rem; display: flex; align-items: center; gap: 1rem; }
+  .section-num { font-family: var(--font-mono); font-size: 12px; color: var(--teal); }
+  .section-title { font-size: 1.6rem; font-weight: 600; color: var(--text); letter-spacing: -0.02em; }
+  .section-line { flex: 1; height: 0.5px; background: var(--border); }
+
+  /* ABOUT */
+  .about-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 3rem; align-items: start; }
+  .about-text p { color: var(--text-muted); margin-bottom: 1rem; font-size: 15px; }
+  .about-text strong { color: var(--teal-bright); font-weight: 500; }
+  .skills-list { display: flex; flex-direction: column; gap: 1.2rem; }
+  .skill-item { display: flex; flex-direction: column; gap: 6px; }
+  .skill-label { display: flex; justify-content: space-between; font-size: 13px; font-family: var(--font-mono); color: var(--text-muted); }
+  .skill-bar { height: 3px; background: var(--surface2); border-radius: 99px; overflow: hidden; }
+  .skill-fill { height: 100%; background: linear-gradient(90deg, var(--teal-dim), var(--teal-bright)); border-radius: 99px; transition: width 1.5s cubic-bezier(0.4,0,0.2,1); width: 0; }
+
+  /* EXPERIENCE */
+  .exp-block { margin-bottom: 1.5rem; padding: 1.5rem; background: var(--surface); border: 0.5px solid var(--border); border-radius: var(--radius); transition: border-color 0.2s; }
+  .exp-block:hover { border-color: var(--border-teal); }
+  .exp-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem; margin-bottom: 0.75rem; flex-wrap: wrap; }
+  .exp-role { font-size: 15px; font-weight: 600; color: var(--text); }
+  .exp-period { font-family: var(--font-mono); font-size: 11px; color: var(--teal); letter-spacing: 0.06em; white-space: nowrap; padding-top: 3px; }
+  .exp-company { font-size: 13px; color: var(--text-muted); margin-bottom: 12px; }
+  .exp-project { margin-bottom: 1rem; padding-left: 1rem; border-left: 2px solid var(--border-teal); }
+  .exp-project:last-of-type { margin-bottom: 0; }
+  .exp-project-name { font-size: 13px; font-weight: 600; color: var(--teal-bright); margin-bottom: 5px; font-family: var(--font-mono); }
+  .exp-desc { font-size: 13px; color: var(--text-muted); line-height: 1.65; padding-left: 1rem; }
+  .exp-desc li { margin-bottom: 3px; }
+  .exp-clients { margin-top: 6px; font-size: 12px; color: var(--text-dim); }
+
+  /* TAGS */
+  .tag { display: inline-block; padding: 2px 9px; border-radius: 4px; font-size: 11px; font-family: var(--font-mono); background: rgba(29,158,117,0.1); color: var(--teal-bright); border: 0.5px solid var(--border-teal); margin: 3px 3px 0 0; }
+
+  /* EDUCATION */
+  .edu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.2rem; }
+  .edu-card { background: var(--surface); border: 0.5px solid var(--border); border-radius: var(--radius); padding: 1.25rem 1.4rem; }
+  .edu-label { font-size: 11px; font-family: var(--font-mono); color: var(--teal); letter-spacing: 0.06em; margin-bottom: 6px; }
+  .edu-title { font-size: 14px; font-weight: 600; color: var(--text); margin-bottom: 4px; }
+  .edu-sub { font-size: 12px; color: var(--text-muted); line-height: 1.5; }
+  .cert-list { display: flex; flex-direction: column; gap: 10px; margin-top: 4px; }
+  .cert-item { display: flex; align-items: flex-start; gap: 10px; font-size: 12px; color: var(--text-muted); line-height: 1.5; }
+  .cert-item i { color: var(--teal); font-size: 15px; margin-top: 2px; flex-shrink: 0; }
+  .cert-year { color: var(--text-dim); font-family: var(--font-mono); font-size: 11px; }
+
+  /* PROJECTS */
+  .tech-tabs { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 2rem; }
+  .tech-tab { padding: 7px 16px; border-radius: var(--radius); font-size: 13px; font-family: var(--font-mono); border: 0.5px solid var(--border); background: transparent; color: var(--text-muted); cursor: pointer; transition: all 0.2s; }
+  .tech-tab:hover { border-color: var(--border-teal); color: var(--teal-bright); }
+  .tech-tab.active { background: rgba(29,158,117,0.12); border-color: var(--teal); color: var(--teal-bright); }
+  .projects-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; }
+  .project-card { background: var(--surface); border: 0.5px solid var(--border); border-radius: var(--radius); padding: 1.5rem; transition: border-color 0.2s, transform 0.2s; display: flex; flex-direction: column; gap: 10px; }
+  .project-card:hover { border-color: var(--border-teal); transform: translateY(-2px); }
+  .project-card.featured { border-color: var(--teal); grid-column: 1 / -1; flex-direction: row; align-items: flex-start; gap: 1.5rem; }
+  .project-icon { width: 44px; height: 44px; border-radius: 8px; background: rgba(29,158,117,0.12); display: flex; align-items: center; justify-content: center; font-size: 22px; color: var(--teal-bright); flex-shrink: 0; }
+  .project-badge { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 10px; font-family: var(--font-mono); background: rgba(29,158,117,0.15); color: var(--teal-bright); border: 0.5px solid var(--border-teal); letter-spacing: 0.06em; }
+  .project-name { font-size: 15px; font-weight: 600; color: var(--text); }
+  .project-desc { font-size: 13px; color: var(--text-muted); line-height: 1.6; flex: 1; }
+  .project-tags { display: flex; flex-wrap: wrap; gap: 5px; }
+  .project-status { display: inline-flex; align-items: center; gap: 5px; font-size: 11px; font-family: var(--font-mono); color: var(--teal-bright); margin-top: 4px; }
+  .dot-live { width: 6px; height: 6px; border-radius: 50%; background: var(--teal-bright); animation: pulse 2s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+
+  /* CONTACT */
+  .contact-wrap { text-align: center; background: var(--surface); border: 0.5px solid var(--border); border-radius: 16px; padding: 3.5rem 2rem; }
+  .contact-wrap h3 { font-size: 1.8rem; font-weight: 600; margin-bottom: 0.75rem; }
+  .contact-wrap p { color: var(--text-muted); margin-bottom: 2rem; line-height: 1.8; }
+  .contact-links { display: flex; justify-content: center; gap: 1rem; flex-wrap: wrap; }
+
+  /* FOOTER */
+  footer { text-align: center; padding: 2rem; font-family: var(--font-mono); font-size: 12px; color: var(--text-dim); border-top: 0.5px solid var(--border); }
+
+  .hidden { display: none !important; }
+
+  /* RESPONSIVE */
+  @media (max-width: 640px) {
+    .about-grid, .edu-grid { grid-template-columns: 1fr; gap: 2rem; }
+    .projects-grid { grid-template-columns: 1fr; }
+    .project-card.featured { flex-direction: column; }
+    nav { padding: 0 1rem; }
+    .nav-links { display: none; }
+    .nav-mobile-btn { display: block; }
+    .nav-links.open { display: flex; flex-direction: column; position: absolute; top: 56px; left: 0; right: 0; background: var(--surface); border-bottom: 0.5px solid var(--border); padding: 1rem 2rem; gap: 1rem; }
+    section { padding: 3rem 1rem; }
+    #hero { padding: 3rem 1rem 4rem; }
+    .hero-stats { gap: 1.5rem; }
+    .exp-header { flex-direction: column; gap: 4px; }
+  }
+</style>
+</head>
+<body>
+
+<nav id="navbar">
+  <a class="nav-logo" href="#hero">&gt; leandro.picek</a>
+  <div class="nav-links" id="nav-links">
+    <a href="#about">sobre mí</a>
+    <a href="#experience">experiencia</a>
+    <a href="#projects">proyectos</a>
+    <a href="#contact">contacto</a>
+  </div>
+  <button class="nav-mobile-btn" onclick="toggleMenu()" aria-label="Menú">
+    <i class="ti ti-menu-2"></i>
+  </button>
+</nav>
+
+<!-- ═══════════════ HERO ═══════════════ -->
+<section id="hero">
+  <div class="hero-eyebrow">disponible para nuevas oportunidades</div>
+  <h1 class="hero-name">Leandro<br>Picek</h1>
+  <div class="hero-title-wrap">
+    <span id="typed-text"></span><span class="cursor"></span>
+  </div>
+  <p class="hero-desc">
+    Desarrollador Full Stack con <strong>+5 años de experiencia</strong> en sistemas de alta
+    transaccionalidad. Especialista en <strong>Oracle · PL/SQL · PHP · Python</strong> con track record
+    en sistemas universitarios, municipales y plataformas de gestión crítica.
+  </p>
+  <div class="hero-actions">
+    <a href="#projects" class="btn btn-primary">
+      <i class="ti ti-folder-open" aria-hidden="true"></i> Ver proyectos
+    </a>
+    <a href="#contact" class="btn btn-outline">
+      <i class="ti ti-send" aria-hidden="true"></i> Contacto
+    </a>
+  </div>
+  <div class="hero-stats">
+    <div><div class="stat-num">5+</div><div class="stat-label">años de experiencia</div></div>
+    <div><div class="stat-num">3</div><div class="stat-label">universidades atendidas</div></div>
+    <div><div class="stat-num">3</div><div class="stat-label">sistemas críticos</div></div>
+    <div><div class="stat-num">6+</div><div class="stat-label">tecnologías core</div></div>
+  </div>
+</section>
+
+<!-- ═══════════════ ABOUT ═══════════════ -->
+<section id="about">
+  <div class="section-header">
+    <span class="section-num">01</span>
+    <h2 class="section-title">Sobre mí</h2>
+    <div class="section-line"></div>
+  </div>
+  <div class="about-grid">
+    <div class="about-text">
+      <p>Soy Leandro, desarrollador Full Stack de <strong>Posadas, Misiones</strong>. Me especializo en sistemas de gestión complejos donde la estabilidad y la precisión de los datos no son negociables — entornos universitarios, tributarios y municipales que operan sin margen de error.</p>
+      <p>Mi stack central es el ecosistema <strong>Oracle</strong> (PL/SQL, Forms, Report Builder) combinado con <strong>PHP y Python</strong> para lógica de negocio, y JavaScript en el cliente. Me siento igual de cómodo en soporte de producción bajo presión que liderando migraciones de sistemas legacy.</p>
+      <p>Actualmente estoy expandiendo mi perfil hacia <strong>Salesforce</strong> y arquitecturas modernas, buscando roles donde pueda aportar solidez backend con capacidad de adaptación a nuevas plataformas.</p>
+      <div style="margin-top:1.5rem;">
+        <a href="mailto:leandro.picek@gmail.com" class="btn btn-outline" style="font-size:13px; padding:8px 16px;">
+          <i class="ti ti-mail" aria-hidden="true"></i> leandro.picek@gmail.com
+        </a>
+      </div>
+    </div>
+    <div class="skills-list" id="skills-list">
+      <div class="skill-item">
+        <div class="skill-label"><span>PL/SQL · Oracle</span><span>92%</span></div>
+        <div class="skill-bar"><div class="skill-fill" data-width="92"></div></div>
+      </div>
+      <div class="skill-item">
+        <div class="skill-label"><span>PHP</span><span>85%</span></div>
+        <div class="skill-bar"><div class="skill-fill" data-width="85"></div></div>
+      </div>
+      <div class="skill-item">
+        <div class="skill-label"><span>Python</span><span>78%</span></div>
+        <div class="skill-bar"><div class="skill-fill" data-width="78"></div></div>
+      </div>
+      <div class="skill-item">
+        <div class="skill-label"><span>JavaScript · HTML · CSS</span><span>80%</span></div>
+        <div class="skill-bar"><div class="skill-fill" data-width="80"></div></div>
+      </div>
+      <div class="skill-item">
+        <div class="skill-label"><span>PostgreSQL · MySQL · SQL Server</span><span>82%</span></div>
+        <div class="skill-bar"><div class="skill-fill" data-width="82"></div></div>
+      </div>
+      <div class="skill-item">
+        <div class="skill-label"><span>JasperReports · Report Builder</span><span>75%</span></div>
+        <div class="skill-bar"><div class="skill-fill" data-width="75"></div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ EXPERIENCE ═══════════════ -->
+<section id="experience">
+  <div class="section-header">
+    <span class="section-num">02</span>
+    <h2 class="section-title">Experiencia</h2>
+    <div class="section-line"></div>
+  </div>
+
+  <div class="exp-block">
+    <div class="exp-header">
+      <div>
+        <div class="exp-role">Desarrollador Full Stack</div>
+        <div class="exp-company">T.D.I. SRL — Tecnología y Desarrollo Informático · Buenos Aires, Argentina</div>
+      </div>
+      <div class="exp-period">ENE 2021 — ACTUALIDAD</div>
+    </div>
+
+    <div class="exp-project">
+      <div class="exp-project-name">SIGEDU — Sistema de Gestión Universitaria</div>
+      <ul class="exp-desc">
+        <li>Migración de aplicaciones legacy en Oracle Forms 10 al framework interno, reduciendo deuda técnica en sistemas institucionales críticos.</li>
+        <li>Desarrollo de nuevas funcionalidades y resolución de incidencias en producción bajo SLA estrictos.</li>
+        <li>Soporte técnico directo a clientes, garantizando continuidad operativa en entornos de alta exigencia.</li>
+      </ul>
+      <div class="exp-clients">Clientes: Universidad Barceló · Universidad Torcuato Di Tella · Universidad River Plate</div>
+    </div>
+
+    <div class="exp-project">
+      <div class="exp-project-name">MisMunicipios — Plataforma de Gestión Municipal</div>
+      <ul class="exp-desc">
+        <li>Liderazgo en migraciones de datos críticos con Oracle, asegurando transiciones sin interrupciones de servicio municipal.</li>
+        <li>Desarrollo de mejoras y nuevas funcionalidades del sistema de gestión.</li>
+        <li>Asistencia funcional directa a municipios y usuarios finales.</li>
+      </ul>
+    </div>
+
+    <div class="exp-project">
+      <div class="exp-project-name">RENTAX — Sistema Tributario</div>
+      <ul class="exp-desc">
+        <li>Desarrollo y mantenimiento de funcionalidades backend del sistema tributario.</li>
+        <li>Elaboración de reportes complejos con JasperReports y Oracle Report Builder.</li>
+      </ul>
+    </div>
+
+    <div style="margin-top:1rem;">
+      <span class="tag">Oracle</span><span class="tag">PL/SQL</span><span class="tag">PHP</span>
+      <span class="tag">JavaScript</span><span class="tag">Oracle Forms</span><span class="tag">JasperReports</span>
+      <span class="tag">Report Builder</span><span class="tag">GitLab</span><span class="tag">Scrum</span>
+    </div>
+  </div>
+
+  <div class="exp-block">
+    <div class="exp-header">
+      <div>
+        <div class="exp-role">Desarrollador Full Stack</div>
+        <div class="exp-company">I-BC SRL · Posadas, Misiones, Argentina</div>
+      </div>
+      <div class="exp-period">AGO 2020 — DIC 2020</div>
+    </div>
+    <div class="exp-project">
+      <div class="exp-project-name">Sistema de Control Náutico</div>
+      <ul class="exp-desc">
+        <li>Desarrollo y mantenimiento de carta náutica digital para sistema interno de control náutico.</li>
+        <li>Implementación de soluciones en Python para mejorar la precisión de datos geoespaciales y el rendimiento del sistema.</li>
+      </ul>
+    </div>
+    <div style="margin-top:1rem;">
+      <span class="tag">Python</span><span class="tag">JavaScript</span><span class="tag">Geoespacial</span>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ EDUCATION ═══════════════ -->
+<section id="education" style="padding-top: 0;">
+  <div class="section-header">
+    <span class="section-num">03</span>
+    <h2 class="section-title">Formación</h2>
+    <div class="section-line"></div>
+  </div>
+  <div class="edu-grid">
+    <div class="edu-card">
+      <div class="edu-label">TÍTULO</div>
+      <div class="edu-title">Analista Programador</div>
+      <div class="edu-sub">Escuela Normal Superior Nº 10<br>Anexo Comercial San Antonio</div>
+      <div class="edu-sub" style="color:var(--text-dim); font-family:var(--font-mono); font-size:11px; margin-top:6px;">2016 – 2019</div>
+    </div>
+    <div class="edu-card">
+      <div class="edu-label">CERTIFICACIONES</div>
+      <div class="cert-list">
+        <div class="cert-item">
+          <i class="ti ti-certificate" aria-hidden="true"></i>
+          <span>Máster en Programación de Videojuegos con Unity 2020 y C# <span class="cert-year">(38 hs · 2020)</span></span>
+        </div>
+        <div class="cert-item">
+          <i class="ti ti-certificate" aria-hidden="true"></i>
+          <span>Desarrolladores Odoo — Introducción Técnico Funcional <span class="cert-year">(20 hs · 2019)</span></span>
+        </div>
+        <div class="cert-item">
+          <i class="ti ti-certificate" aria-hidden="true"></i>
+          <span>Frontend Angular 4 + Backend Symfony 3.3 <span class="cert-year">(10 hs · 2018)</span></span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ PROJECTS ═══════════════ -->
+<section id="projects" style="padding-top: 0;">
+  <div class="section-header">
+    <span class="section-num">04</span>
+    <h2 class="section-title">Proyectos demo</h2>
+    <div class="section-line"></div>
+  </div>
+
+  <div class="tech-tabs">
+    <button class="tech-tab active" onclick="filterProjects('all', this)">todos</button>
+    <button class="tech-tab" onclick="filterProjects('salesforce', this)">salesforce</button>
+    <button class="tech-tab" onclick="filterProjects('oracle', this)">oracle · pl/sql</button>
+    <button class="tech-tab" onclick="filterProjects('python', this)">python</button>
+    <button class="tech-tab" onclick="filterProjects('php', this)">php</button>
+  </div>
+
+  <div class="projects-grid" id="projects-grid">
+
+    <div class="project-card featured" data-tech="salesforce">
+      <div class="project-icon"><i class="ti ti-cloud" aria-hidden="true"></i></div>
+      <div style="flex:1; display:flex; flex-direction:column; gap:10px;">
+        <div style="display:flex; align-items:center; gap:8px;">
+          <span class="project-badge">SALESFORCE</span>
+          <div class="project-status"><div class="dot-live"></div> demo disponible</div>
+        </div>
+        <div class="project-name">CRM Intelligence Dashboard</div>
+        <div class="project-desc">Demo funcional de un entorno Salesforce con gestión de leads, oportunidades y pipeline de ventas. Incluye lógica de negocio, consultas SOQL simuladas y métricas en tiempo real. Construido para demostrar dominio de la plataforma.</div>
+        <div class="project-tags">
+          <span class="tag">Apex</span><span class="tag">LWC</span><span class="tag">SOQL</span>
+          <span class="tag">Sales Cloud</span><span class="tag">REST API</span>
+        </div>
+        <!-- Reemplazá el href con la URL real de tu demo cuando la tengas -->
+        <a href="#" class="btn btn-primary" style="margin-top:4px; width:fit-content; font-size:13px; padding:8px 18px;">
+          <i class="ti ti-external-link" aria-hidden="true"></i> Ver demo
+        </a>
+      </div>
+    </div>
+
+    <div class="project-card" data-tech="oracle">
+      <div style="display:flex; align-items:center; gap:8px; margin-bottom:2px;">
+        <span class="project-badge">ORACLE · PL/SQL</span>
+      </div>
+      <div class="project-name">Simulador SIGEDU</div>
+      <div class="project-desc">Demo de gestión universitaria con módulos de inscripción, actas y reportes. Refleja la lógica de negocio de sistemas en producción para universidades.</div>
+      <div class="project-tags">
+        <span class="tag">PL/SQL</span><span class="tag">Oracle</span><span class="tag">Report Builder</span>
+      </div>
+    </div>
+
+    <div class="project-card" data-tech="python">
+      <div style="display:flex; align-items:center; gap:8px; margin-bottom:2px;">
+        <span class="project-badge">PYTHON</span>
+      </div>
+      <div class="project-name">Procesamiento Geoespacial</div>
+      <div class="project-desc">Herramienta de análisis y visualización de datos náuticos. Parsing de coordenadas, validación de trayectorias y generación de reportes.</div>
+      <div class="project-tags">
+        <span class="tag">Python</span><span class="tag">GeoPandas</span><span class="tag">Folium</span>
+      </div>
+    </div>
+
+    <div class="project-card" data-tech="php">
+      <div style="display:flex; align-items:center; gap:8px; margin-bottom:2px;">
+        <span class="project-badge">PHP · ORACLE</span>
+      </div>
+      <div class="project-name">Panel Tributario RENTAX</div>
+      <div class="project-desc">Demo de sistema tributario municipal con gestión de contribuyentes, liquidaciones y generación de reportes con JasperReports.</div>
+      <div class="project-tags">
+        <span class="tag">PHP</span><span class="tag">Oracle</span><span class="tag">JasperReports</span>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ═══════════════ CONTACT ═══════════════ -->
+<section id="contact">
+  <div class="section-header">
+    <span class="section-num">05</span>
+    <h2 class="section-title">Contacto</h2>
+    <div class="section-line"></div>
+  </div>
+  <div class="contact-wrap">
+    <h3>¿Hablamos?</h3>
+    <p>
+      Abierto a oportunidades remotas o híbridas.<br>
+      Posadas, Misiones, Argentina.<br>
+      <span style="font-family:var(--font-mono); font-size:13px; color:var(--teal-bright);">+54 9 3764 229638</span>
+    </p>
+    <div class="contact-links">
+      <a href="mailto:leandro.picek@gmail.com" class="btn btn-primary">
+        <i class="ti ti-mail" aria-hidden="true"></i> leandro.picek@gmail.com
+      </a>
+      <a href="https://linkedin.com/in/leandropicek" target="_blank" rel="noopener" class="btn btn-outline">
+        <i class="ti ti-brand-linkedin" aria-hidden="true"></i> LinkedIn
+      </a>
+      <a href="https://github.com/leandropicek" target="_blank" rel="noopener" class="btn btn-outline">
+        <i class="ti ti-brand-github" aria-hidden="true"></i> GitHub
+      </a>
+      <a href="tel:+5493764229638" class="btn btn-outline">
+        <i class="ti ti-phone" aria-hidden="true"></i> +54 9 3764 229638
+      </a>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <span>leandro picek · full stack developer · posadas, misiones, ar · </span>
+  <span id="year"></span>
+</footer>
+
+<script>
+  document.getElementById('year').textContent = new Date().getFullYear();
+
+  // Typewriter
+  const titles = [
+    'Full Stack Developer',
+    'Oracle · PL/SQL Specialist',
+    'PHP · Python · JavaScript',
+    'Sistemas de Alta Transaccionalidad',
+    'Salesforce Developer'
+  ];
+  let ti = 0, ci = 0, deleting = false;
+  const el = document.getElementById('typed-text');
+  function type() {
+    const cur = titles[ti];
+    if (!deleting) {
+      el.textContent = cur.slice(0, ++ci);
+      if (ci === cur.length) { deleting = true; setTimeout(type, 2000); return; }
+    } else {
+      el.textContent = cur.slice(0, --ci);
+      if (ci === 0) { deleting = false; ti = (ti + 1) % titles.length; }
+    }
+    setTimeout(type, deleting ? 40 : 75);
+  }
+  setTimeout(type, 500);
+
+  // Skill bars on scroll
+  let skillsAnimated = false;
+  const skillObs = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (e.isIntersecting && !skillsAnimated) {
+        skillsAnimated = true;
+        document.querySelectorAll('.skill-fill').forEach(b => {
+          b.style.width = b.dataset.width + '%';
+        });
+      }
+    });
+  }, { threshold: 0.3 });
+  const sl = document.getElementById('skills-list');
+  if (sl) skillObs.observe(sl);
+
+  // Project filter
+  function filterProjects(tech, btn) {
+    document.querySelectorAll('.tech-tab').forEach(t => t.classList.remove('active'));
+    btn.classList.add('active');
+    document.querySelectorAll('.project-card').forEach(card => {
+      card.classList.toggle('hidden', tech !== 'all' && card.dataset.tech !== tech);
+    });
+  }
+
+  // Mobile menu
+  function toggleMenu() {
+    document.getElementById('nav-links').classList.toggle('open');
+  }
+  document.addEventListener('click', e => {
+    if (!e.target.closest('nav')) {
+      document.getElementById('nav-links').classList.remove('open');
+    }
+  });
+</script>
+</body>
+</html>
