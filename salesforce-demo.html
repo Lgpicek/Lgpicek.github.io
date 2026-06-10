@@ -485,47 +485,47 @@
     <!-- SIDEBAR -->
     <aside class="sf-sidebar" aria-label="Menú lateral">
       <div class="sb-section">Automatizaciones</div>
-      <button class="sb-item active" onclick="goPage(this,'flows')" aria-label="Flows activos">
+      <button class="sb-item" data-page="flows" active" aria-label="Flows activos">
         <i class="ti ti-arrows-transfer-down" aria-hidden="true"></i>
         <span>Flows activos</span>
         <span class="sb-count">4</span>
       </button>
-      <button class="sb-item" onclick="goPage(this,'leads')" aria-label="Leads">
+      <button class="sb-item" data-page="leads"" aria-label="Leads">
         <i class="ti ti-user-plus" aria-hidden="true"></i>
         <span>Leads</span>
         <span class="sb-count red">3</span>
       </button>
-      <button class="sb-item" onclick="goPage(this,'logs')" aria-label="Registro ejecuciones">
+      <button class="sb-item" data-page="logs"" aria-label="Registro ejecuciones">
         <i class="ti ti-list-check" aria-hidden="true"></i>
         <span>Registro ejecuciones</span>
       </button>
       <div class="sb-section">Herramientas IA</div>
-      <button class="sb-item" onclick="goPage(this,'ai-builder')" aria-label="Flow Builder IA">
+      <button class="sb-item" data-page="ai-builder"" aria-label="Flow Builder IA">
         <i class="ti ti-brain" aria-hidden="true"></i>
         <span>Flow Builder IA</span>
       </button>
-      <button class="sb-item" onclick="goPage(this,'ai-score')" aria-label="Lead Scoring IA">
+      <button class="sb-item" data-page="ai-score"" aria-label="Lead Scoring IA">
         <i class="ti ti-chart-bar" aria-hidden="true"></i>
         <span>Lead Scoring IA</span>
       </button>
       <div class="sb-section">Senior Toolkit</div>
-      <button class="sb-item" onclick="goPage(this,'rest')" aria-label="REST Integration">
+      <button class="sb-item" data-page="rest"" aria-label="REST Integration">
         <i class="ti ti-plug" aria-hidden="true"></i>
         <span>REST Integration</span>
       </button>
-      <button class="sb-item" onclick="goPage(this,'lwc')" aria-label="LWC Builder">
+      <button class="sb-item" data-page="lwc"" aria-label="LWC Builder">
         <i class="ti ti-components" aria-hidden="true"></i>
         <span>LWC Builder</span>
       </button>
-      <button class="sb-item" onclick="goPage(this,'agentforce')" aria-label="Agentforce">
+      <button class="sb-item" data-page="agentforce"" aria-label="Agentforce">
         <i class="ti ti-robot" aria-hidden="true"></i>
         <span>Agentforce &#11088;</span>
       </button>
-      <button class="sb-item" onclick="goPage(this,'debugger')" aria-label="Apex Debugger">
+      <button class="sb-item" data-page="debugger"" aria-label="Apex Debugger">
         <i class="ti ti-bug" aria-hidden="true"></i>
         <span>Apex Debugger</span>
       </button>
-      <button class="sb-item" onclick="goPage(this,'security')" aria-label="Security Model">
+      <button class="sb-item" data-page="security"" aria-label="Security Model">
         <i class="ti ti-shield-check" aria-hidden="true"></i>
         <span>Security Model</span>
       </button>
@@ -561,7 +561,7 @@
 
         <div class="sec-title"><i class="ti ti-arrows-transfer-down" aria-hidden="true"></i> Flows configurados</div>
         <div class="flows-list">
-          <div class="flow-row active" onclick="pickFlow(this,0)" role="button" tabindex="0">
+          <div class="flow-row active" data-flow="0" role="button" tabindex="0">
             <div class="flow-ico ico-blue"><i class="ti ti-user-check" aria-hidden="true"></i></div>
             <div style="flex:1">
               <div class="flow-name">Lead Qualification Flow</div>
@@ -570,7 +570,7 @@
             <div class="flow-pill pill-active"><span style="width:5px;height:5px;border-radius:50%;background:#5DCAA5;display:inline-block;"></span> Activo</div>
             <div class="flow-runs">134 runs hoy</div>
           </div>
-          <div class="flow-row" onclick="pickFlow(this,1)" role="button" tabindex="0">
+          <div class="flow-row" data-flow="1" role="button" tabindex="0">
             <div class="flow-ico ico-orange"><i class="ti ti-mail-forward" aria-hidden="true"></i></div>
             <div style="flex:1">
               <div class="flow-name">Escalation Auto-Notify</div>
@@ -579,7 +579,7 @@
             <div class="flow-pill pill-active"><span style="width:5px;height:5px;border-radius:50%;background:#5DCAA5;display:inline-block;"></span> Activo</div>
             <div class="flow-runs">58 runs hoy</div>
           </div>
-          <div class="flow-row" onclick="pickFlow(this,2)" role="button" tabindex="0">
+          <div class="flow-row" data-flow="2" role="button" tabindex="0">
             <div class="flow-ico ico-green"><i class="ti ti-currency-dollar" aria-hidden="true"></i></div>
             <div style="flex:1">
               <div class="flow-name">Opportunity Stage Update</div>
@@ -588,7 +588,7 @@
             <div class="flow-pill pill-active"><span style="width:5px;height:5px;border-radius:50%;background:#5DCAA5;display:inline-block;"></span> Activo</div>
             <div class="flow-runs">55 runs hoy</div>
           </div>
-          <div class="flow-row" onclick="pickFlow(this,3)" role="button" tabindex="0">
+          <div class="flow-row" data-flow="3" role="button" tabindex="0">
             <div class="flow-ico ico-purple"><i class="ti ti-brain" aria-hidden="true"></i></div>
             <div style="flex:1">
               <div class="flow-name">AI Lead Scoring Flow</div>
@@ -704,8 +704,8 @@
           <div class="field-label">Describí qué querés automatizar</div>
           <textarea class="ai-ta" id="fb-input" rows="4" placeholder="Ej: Cuando un lead llega con cargo Director o VP y empresa con +500 empleados, asignarlo automáticamente al equipo enterprise y notificar al gerente de ventas con un resumen del lead..."></textarea>
           <div class="ai-row">
-            <button class="btn-ai" onclick="runFlowBuilder()"><i class="ti ti-sparkles" aria-hidden="true"></i> Generar Flow</button>
-            <button class="btn-ghost" onclick="document.getElementById('fb-input').value='Cuando un lead se crea con Lead Source = Web y país = Argentina, esperar 10 minutos, enviar email de bienvenida personalizado y si no abre el email en 48hs crear una tarea para el SDR encargado'">
+            <button class="btn-ai" id="btn-fb"><i class="ti ti-sparkles" aria-hidden="true"></i> Generar Flow</button>
+            <button class="btn-ghost" id="btn-fill-fb">
               <i class="ti ti-bulb" aria-hidden="true"></i> Cargar ejemplo
             </button>
           </div>
@@ -744,8 +744,8 @@
             </div>
           </div>
           <div class="ai-row">
-            <button class="btn-ai" onclick="runScoring()"><i class="ti ti-chart-bar" aria-hidden="true"></i> Analizar Lead</button>
-            <button class="btn-ghost" onclick="fillScoreExample()"><i class="ti ti-bulb" aria-hidden="true"></i> Cargar ejemplo</button>
+            <button class="btn-ai" id="btn-score"><i class="ti ti-chart-bar" aria-hidden="true"></i> Analizar Lead</button>
+            <button class="btn-ghost" id="btn-fill-score"><i class="ti ti-bulb" aria-hidden="true"></i> Cargar ejemplo</button>
           </div>
           <div class="ai-thinking" id="sc-thinking"><div class="dots"><div class="d"></div><div class="d"></div><div class="d"></div></div><span>Evaluando perfil del lead con criterios de calificación...</span></div>
           <div class="ai-result" id="sc-result"><div class="result-label">Respuesta IA · Lead Scoring Engine</div><div id="sc-text"></div></div>
@@ -785,8 +785,8 @@
             </div>
           </div>
           <div class="ai-row">
-            <button class="btn-ai" onclick="runRest()"><i class="ti ti-code" aria-hidden="true"></i> Generar código Apex</button>
-            <button class="btn-ghost" onclick="fillRestExample()"><i class="ti ti-bulb" aria-hidden="true"></i> Cargar ejemplo</button>
+            <button class="btn-ai" id="btn-rest"><i class="ti ti-code" aria-hidden="true"></i> Generar código Apex</button>
+            <button class="btn-ghost" id="btn-fill-rest"><i class="ti ti-bulb" aria-hidden="true"></i> Cargar ejemplo</button>
           </div>
           <div class="ai-thinking" id="rest-thinking"><div class="dots"><div class="d"></div><div class="d"></div><div class="d"></div></div><span>Generando Apex HttpRequest con best practices...</span></div>
           <div class="ai-result" id="rest-result"><div class="result-label">Código Apex · REST Integration Pattern</div><div id="rest-text" style="font-family:monospace;font-size:11px;white-space:pre;overflow-x:auto;"></div></div>
@@ -821,8 +821,8 @@
             </div>
           </div>
           <div class="ai-row">
-            <button class="btn-ai" onclick="runLwc()" style="background:#7B5EA7;"><i class="ti ti-sparkles" aria-hidden="true"></i> Generar LWC</button>
-            <button class="btn-ghost" onclick="fillLwcExample()"><i class="ti ti-bulb" aria-hidden="true"></i> Cargar ejemplo</button>
+            <button class="btn-ai" id="btn-lwc" style="background:#7B5EA7;"><i class="ti ti-sparkles" aria-hidden="true"></i> Generar LWC</button>
+            <button class="btn-ghost" id="btn-fill-lwc"><i class="ti ti-bulb" aria-hidden="true"></i> Cargar ejemplo</button>
           </div>
           <div class="ai-thinking" id="lwc-thinking"><div class="dots"><div class="d"></div><div class="d"></div><div class="d"></div></div><span>Generando HTML, JS, CSS y Apex controller...</span></div>
           <div class="ai-result" id="lwc-result"><div class="result-label">Código LWC · Lightning Web Component</div><div id="lwc-text" style="font-family:monospace;font-size:11px;white-space:pre;overflow-x:auto;"></div></div>
@@ -843,12 +843,12 @@
             </div>
             <div id="agent-chat" style="min-height:160px;max-height:220px;overflow-y:auto;margin-bottom:10px;display:flex;flex-direction:column;gap:8px;padding:4px 0;"></div>
             <div style="display:flex;gap:6px;">
-              <input class="ai-inp" id="agent-input" type="text" placeholder="Ej: ¿Cuántos leads hot tenemos hoy?" style="flex:1;" onkeydown="if(event.key==='Enter')runAgent()">
-              <button class="btn-ai" onclick="runAgent()" style="padding:7px 14px;white-space:nowrap;"><i class="ti ti-send" aria-hidden="true"></i></button>
+              <input class="ai-inp" id="agent-input" type="text" placeholder="Ej: ¿Cuántos leads hot tenemos hoy?" style="flex:1;" id="agent-input">
+              <button class="btn-ai" id="btn-agent" style="padding:7px 14px;white-space:nowrap;"><i class="ti ti-send" aria-hidden="true"></i></button>
             </div>
             <div style="margin-top:8px;display:flex;gap:5px;flex-wrap:wrap;">
               <button class="btn-ghost" style="font-size:11px;padding:4px 8px;" onclick="setAgentQ('¿Cuántas oportunidades cerré este mes?')">Oportunidades del mes</button>
-              <button class="btn-ghost" style="font-size:11px;padding:4px 8px;" onclick="setAgentQ('Resume el pipeline de ventas actual')">Pipeline actual</button>
+              <button class="btn-ghost" style="font-size:11px;padding:4px 8px;" data-q="Resume el pipeline de ventas actual">Pipeline actual</button>
               <button class="btn-ghost" style="font-size:11px;padding:4px 8px;" onclick="setAgentQ('¿Qué leads necesitan seguimiento urgente?')">Leads urgentes</button>
             </div>
           </div>
@@ -893,8 +893,8 @@
           <div class="field-label">Código Apex</div>
           <textarea class="ai-ta" id="debug-code" rows="7" style="font-family:monospace;font-size:12px;" placeholder="Pega tu código Apex aquí...&#10;&#10;Ej:&#10;trigger LeadTrigger on Lead (before insert) {&#10;  for(Lead l : Trigger.new) {&#10;    List&lt;Contact&gt; contacts = [SELECT Id FROM Contact WHERE Email = :l.Email];&#10;    if(contacts.size() &gt; 0) {&#10;      l.addError('Ya existe un contacto con ese email');&#10;    }&#10;  }&#10;}"></textarea>
           <div class="ai-row">
-            <button class="btn-ai" onclick="runDebugger()" style="background:#DD5A0E;"><i class="ti ti-bug" aria-hidden="true"></i> Analizar código</button>
-            <button class="btn-ghost" onclick="fillDebugExample()"><i class="ti ti-bulb" aria-hidden="true"></i> Cargar ejemplo con bugs</button>
+            <button class="btn-ai" id="btn-debug" style="background:#DD5A0E;"><i class="ti ti-bug" aria-hidden="true"></i> Analizar código</button>
+            <button class="btn-ghost" id="btn-fill-debug"><i class="ti ti-bulb" aria-hidden="true"></i> Cargar ejemplo con bugs</button>
           </div>
           <div class="ai-thinking" id="debug-thinking"><div class="dots"><div class="d"></div><div class="d"></div><div class="d"></div></div><span>Analizando governor limits y patrones problemáticos...</span></div>
           <div class="ai-result" id="debug-result"><div class="result-label">Análisis · Apex Code Review</div><div id="debug-text" style="white-space:pre-wrap;"></div></div>
@@ -929,8 +929,8 @@
             </div>
           </div>
           <div class="ai-row">
-            <button class="btn-ai" onclick="runSecurity()"><i class="ti ti-shield-check" aria-hidden="true"></i> Generar modelo de seguridad</button>
-            <button class="btn-ghost" onclick="fillSecExample()"><i class="ti ti-bulb" aria-hidden="true"></i> Cargar ejemplo</button>
+            <button class="btn-ai" id="btn-sec"><i class="ti ti-shield-check" aria-hidden="true"></i> Generar modelo de seguridad</button>
+            <button class="btn-ghost" id="btn-fill-sec"><i class="ti ti-bulb" aria-hidden="true"></i> Cargar ejemplo</button>
           </div>
           <div class="ai-thinking" id="sec-thinking"><div class="dots"><div class="d"></div><div class="d"></div><div class="d"></div></div><span>Diseñando modelo de datos y esquema de seguridad...</span></div>
           <div class="ai-result" id="sec-result"><div class="result-label">Diseño · Security & Data Model</div><div id="sec-text" style="white-space:pre-wrap;"></div></div>
@@ -1015,8 +1015,6 @@ function renderFlow(idx) {
     </div>
   `).join('');
 }
-renderFlow(0);
-
 function pickFlow(el, idx) {
   document.querySelectorAll('.flow-row').forEach(r => r.classList.remove('active'));
   el.classList.add('active');
@@ -1956,6 +1954,75 @@ function fillSecExample() {
   if (!chat) return;
   chat.innerHTML = `<div style="align-self:flex-start;background:rgba(240,200,66,.07);border:.5px solid rgba(240,200,66,.2);border-radius:8px 8px 8px 2px;padding:8px 11px;font-size:12px;color:var(--text);max-width:90%;line-height:1.6;">¡Hola! Soy el agente Einstein. Preguntame sobre leads, oportunidades o el pipeline de ventas.</div>`;
 })();
+
+/* ══════════════════════════════════════════
+   EVENT WIRING — DOMContentLoaded
+   All interactions wired here, zero onclick
+   ══════════════════════════════════════════ */
+document.addEventListener('DOMContentLoaded', function() {
+
+  /* ── Sidebar navigation ── */
+  document.querySelectorAll('.sb-item[data-page]').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      goPage(btn, btn.getAttribute('data-page'));
+    });
+  });
+
+  /* ── Flow rows ── */
+  document.querySelectorAll('.flow-row[data-flow]').forEach(function(row) {
+    row.addEventListener('click', function() {
+      pickFlow(row, parseInt(row.getAttribute('data-flow')));
+    });
+  });
+
+  /* ── AI tool buttons ── */
+  var bindings = [
+    ['btn-fb',        function(){ runFlowBuilder(); }],
+    ['btn-fill-fb',   function(){
+      var el = document.getElementById('fb-input');
+      if(el) el.value = 'Cuando un lead se crea con Lead Source = Web y pais = Argentina, esperar 10 minutos, enviar email de bienvenida personalizado y si no abre el email en 48hs crear una tarea para el SDR encargado';
+    }],
+    ['btn-score',     function(){ runScoring(); }],
+    ['btn-fill-score',function(){ fillScoreExample(); }],
+    ['btn-rest',      function(){ runRest(); }],
+    ['btn-fill-rest', function(){ fillRestExample(); }],
+    ['btn-lwc',       function(){ runLwc(); }],
+    ['btn-fill-lwc',  function(){ fillLwcExample(); }],
+    ['btn-agent',     function(){ runAgent(); }],
+    ['btn-debug',     function(){ runDebugger(); }],
+    ['btn-fill-debug',function(){ fillDebugExample(); }],
+    ['btn-sec',       function(){ runSecurity(); }],
+    ['btn-fill-sec',  function(){ fillSecExample(); }],
+  ];
+  bindings.forEach(function(pair) {
+    var el = document.getElementById(pair[0]);
+    if (el) el.addEventListener('click', pair[1]);
+  });
+
+  /* ── Agent input Enter key ── */
+  var agentInput = document.getElementById('agent-input');
+  if (agentInput) {
+    agentInput.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') runAgent();
+    });
+  }
+
+  /* ── Agent quick question buttons ── */
+  document.querySelectorAll('[data-q]').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      setAgentQ(btn.getAttribute('data-q'));
+    });
+  });
+
+  /* ── Init: render first flow ── */
+  renderFlow(0);
+
+  /* ── Init: Agentforce welcome message ── */
+  var chat = document.getElementById('agent-chat');
+  if (chat && chat.children.length === 0) {
+    chat.innerHTML = '<div style="align-self:flex-start;background:rgba(240,200,66,.07);border:.5px solid rgba(240,200,66,.2);border-radius:8px 8px 8px 2px;padding:8px 11px;font-size:12px;color:var(--text);max-width:90%;line-height:1.6;">Hola! Soy el agente Einstein de Leandro. Preguntame sobre leads, oportunidades o el pipeline de ventas.</div>';
+  }
+});
 
 </script>
 </body>
