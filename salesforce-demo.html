@@ -824,71 +824,252 @@ function goPage(btn, id) {
   document.getElementById('page-' + id).classList.add('active');
 }
 
-/* ── CLAUDE API ── */
-async function callClaude(systemPrompt, userPrompt) {
-  const res = await fetch('https://api.anthropic.com/v1/messages', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      model: 'claude-sonnet-4-20250514',
-      max_tokens: 1000,
-      system: systemPrompt,
-      messages: [{ role: 'user', content: userPrompt }]
-    })
-  });
-  const data = await res.json();
-  return data.content?.map(b => b.type === 'text' ? b.text : '').join('') || 'Error al contactar la API.';
+/* ══════════════════════════════════════════════════════════
+   MOTOR OFFLINE — Flow Builder + Lead Scoring
+   Sin API key · Sin costo · Funciona 100% en GitHub Pages
+   Combina análisis de keywords + lógica de scoring real
+   ══════════════════════════════════════════════════════════ */
+
+// ── Utilidad: simular delay de "pensando" ──
+function fakeDelay(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+// ── Detectar keywords en el texto del usuario ──
+function detectar(texto) {
+  const t = texto.toLowerCase();
+  return {
+    isScheduled:  /cada|diario|semanal|hora|programad|cron|noche|mañana|periodo/.test(t),
+    isScreen:     /formulario|pantalla|screen|usuario ingresa|interfaz|wizard|paso a paso/.test(t),
+    isLead:       /lead|prospecto|contacto nuevo|formulario web|interesado/.test(t),
+    isCase:       /caso|case|soporte|ticket|reclamo|incidencia|escalar/.test(t),
+    isOpp:        /oportunidad|opportunity|venta|negocio|deal|propuesta|cotizaci/.test(t),
+    isAccount:    /cuenta|account|cliente|empresa|organización/.test(t),
+    isEmail:      /email|correo|notific|aviso|alerta|mail/.test(t),
+    isTask:       /tarea|task|recordatorio|seguimiento|llamar|llamada/.test(t),
+    isApex:       /cálculo|calcul|integrac|api externa|servicio|lógica compleja|puntaje|score/.test(t),
+    isPago:       /pago|factura|vencimiento|cobro|invoice|deuda/.test(t),
+    isNurturing:  /nurturing|secuencia|campaña|marketing|drip|seguimiento automát/.test(t),
+    isAsignacion: /asignar|asignación|distribuir|equipo|owner|responsable/.test(t),
+    hasCondicion: /si |cuando |mayor|menor|igual|entre|dependiendo|según/.test(t),
+    hasDias:      /(\d+)\s*d[íi]as?/.test(t),
+    dias:         (t.match(/(\d+)\s*d[íi]as?/) || [null,'30'])[1],
+  };
 }
 
+// ── FLOW BUILDER OFFLINE ──
+function generarFlow(descripcion) {
+  const d = detectar(descripcion);
+
+  // Tipo de flow
+  let tipo, objeto, trigger;
+  if (d.isScheduled) {
+    tipo = 'Scheduled Flow';
+    trigger = d.dias
+      ? `Corre diariamente. Criterio: fecha relevante < TODAY() - ${d.dias}`
+      : 'Corre cada hora/día según configuración de programación';
+  } else if (d.isScreen) {
+    tipo = 'Screen Flow';
+    trigger = 'Iniciado manualmente por el usuario desde un botón o componente LWC';
+  } else {
+    tipo = 'Record-Triggered Flow';
+    trigger = 'Se activa al crear o modificar el registro. Entry Criteria según campos relevantes.';
+  }
+
+  if (d.isLead)    objeto = 'Lead';
+  else if (d.isCase)   objeto = 'Case';
+  else if (d.isOpp)    objeto = 'Opportunity';
+  else if (d.isPago)   objeto = 'Invoice__c / Order';
+  else if (d.isAccount) objeto = 'Account';
+  else objeto = 'Objeto personalizado o estándar según contexto';
+
+  // Construir pasos dinámicamente
+  const pasos = [];
+  let n = 1;
+
+  if (d.isScheduled) {
+    pasos.push(`${n++}. Get Records (SOQL) → Obtener registros que cumplan la condición temporal\n   SELECT Id, Name, Status FROM ${objeto} WHERE [condición_fecha] AND Status != 'Closed'`);
+    pasos.push(`${n++}. Loop → Iterar sobre cada registro encontrado`);
+  }
+
+  if (d.hasCondicion || d.isAsignacion || d.isNurturing) {
+    pasos.push(`${n++}. Decision → Evaluar criterios de negocio\n   ${d.isApex ? 'Score ≥ 80: rama Hot | 40-79: rama Warm | < 40: rama Cold' : 'Condición principal según reglas definidas → rama Sí / rama No'}`);
+  }
+
+  if (d.isApex || d.isNurturing) {
+    pasos.push(`${n++}. Apex Action → Invocar @InvocableMethod para lógica compleja\n   Clase: ${d.isApex ? 'ScoringService.calculate()' : 'NurturingService.enroll()'} — manejo de callouts y operaciones DML masivas`);
+  }
+
+  if (d.isEmail) {
+    pasos.push(`${n++}. Send Email Alert → Email Template personalizado al Owner / Manager\n   Campos dinámicos: {!$Record.Name}, {!$Record.Email}, fecha y contexto del evento`);
+  }
+
+  if (d.isTask) {
+    pasos.push(`${n++}. Create Records → Task\n   Subject: 'Seguimiento: {!$Record.Name}' | ActivityDate: TODAY() + ${d.dias || 1} | Priority: High | OwnerId: asignado dinámicamente`);
+  }
+
+  if (d.isAsignacion) {
+    pasos.push(`${n++}. Assignment + Update Record → Asignar OwnerId según regla\n   Criterio: ${d.isLead ? 'Lead.Score__c, LeadSource, Industry' : 'campos relevantes del objeto'} → equipo correspondiente`);
+  }
+
+  pasos.push(`${n++}. Update Record → Actualizar campos de estado y auditoría\n   Status, LastProcessedDate__c, FlowExecutionLog__c = NOW()`);
+
+  // SOQL
+  const soqlMap = {
+    Lead: `SELECT Id, FirstName, LastName, Email, Company, LeadSource, Status, Lead_Score__c\nFROM Lead\nWHERE IsConverted = false AND Status = 'New'`,
+    Case: `SELECT Id, Subject, Status, Priority, OwnerId, CreatedDate\nFROM Case\nWHERE Status = 'Open' AND LastModifiedDate < LAST_N_HOURS:24`,
+    Opportunity: `SELECT Id, Name, StageName, Amount, CloseDate, Probability\nFROM Opportunity\nWHERE StageName NOT IN ('Closed Won','Closed Lost') AND Amount > 0`,
+  };
+  const soql = soqlMap[objeto] || `SELECT Id, Name, Status FROM ${objeto} WHERE IsActive = true`;
+
+  // Consideraciones técnicas
+  const consideraciones = [
+    '⚡ Bulkification: usar colecciones en loops, nunca DML dentro del loop (governor limit: 150 DML/transacción)',
+    '⚡ Error Handling: agregar elemento Fault Path en cada Apex Action para capturar excepciones',
+    d.isScheduled ? '⚡ Scheduled Flow: configurar Run As "System" para evitar problemas de permisos en ejecución nocturna' : '⚡ Record-Triggered: activar "Run Asynchronously" si el flow realiza callouts externos',
+    '⚡ Testing: cubrir con Apex Test Class al menos 75% del código para deployment en producción',
+  ].join('\n');
+
+  return `1. TIPO DE FLOW
+${tipo}
+
+2. OBJETO SALESFORCE PRINCIPAL
+${objeto}
+
+3. TRIGGER
+${trigger}
+
+4. PASOS DEL FLOW
+${pasos.join('\n\n')}
+
+5. CAMPOS SOQL RELEVANTES
+${soql}
+
+6. CONSIDERACIONES TÉCNICAS
+${consideraciones}`;
+}
+
+// ── LEAD SCORING OFFLINE ──
+function calcularScore(nombre, empresa, industria, comportamiento) {
+  let score = 40; // base
+  const pts = [];
+  const n = nombre.toLowerCase();
+  const e = empresa.toLowerCase();
+  const i = industria.toLowerCase();
+  const c = comportamiento.toLowerCase();
+
+  // Cargo — peso alto
+  if (/ceo|cto|coo|cfo|director|vp |vice president|gerente general|founder|owner/.test(n)) {
+    score += 28; pts.push('Cargo C-Level o Director (+28): decisor con poder de compra real');
+  } else if (/gerente|manager|jefe|head of|lider|líder|coordinador/.test(n)) {
+    score += 16; pts.push('Cargo de gestión media (+16): influenciador en la decisión');
+  } else if (/developer|analista|técnico|junior|estudiante|pasante/.test(n)) {
+    score -= 10; pts.push('Cargo técnico/operativo (-10): bajo poder de decisión de compra');
+  }
+
+  // Tamaño de empresa
+  const match = e.match(/(\d+)\s*(empleados?|personas?|staff)/);
+  if (match) {
+    const emp = parseInt(match[1]);
+    if (emp >= 500)       { score += 22; pts.push(`Empresa ${emp}+ empleados (+22): enterprise, alto potencial de contrato`); }
+    else if (emp >= 100)  { score += 14; pts.push(`Empresa ${emp} empleados (+14): mid-market, buen potencial`); }
+    else if (emp >= 20)   { score += 7;  pts.push(`Empresa ${emp} empleados (+7): SMB, potencial moderado`); }
+    else                  { score -= 5;  pts.push(`Empresa pequeña (-5): presupuesto probablemente limitado`); }
+  }
+
+  // Industria
+  if (/tecnolog|software|saas|fintech|healthtech|startup/.test(i)) {
+    score += 12; pts.push('Industria tech/SaaS (+12): alta adopción de herramientas digitales');
+  } else if (/retail|manufactura|logística|transporte/.test(i)) {
+    score += 6; pts.push('Industria tradicional en digitalización (+6): mercado en expansión');
+  } else if (/educación|ong|gobierno|público/.test(i)) {
+    score -= 8; pts.push('Sector público/educativo (-8): ciclos de compra largos y presupuesto acotado');
+  }
+
+  // Comportamiento
+  if (/pricing|precios|planes|cotización/.test(c)) {
+    score += 18; pts.push('Visitó página de pricing (+18): señal de intención de compra directa');
+  }
+  if (/whitepaper|ebook|descarg|case study/.test(c)) {
+    score += 10; pts.push('Descargó contenido técnico (+10): interés profundo en la solución');
+  }
+  if (/demo|prueba|trial|free trial/.test(c)) {
+    score += 15; pts.push('Solicitó demo o trial (+15): intención de evaluación activa');
+  }
+  const emailsMatch = c.match(/(\d+)\s*emails?/);
+  if (emailsMatch) {
+    const emails = parseInt(emailsMatch[1]);
+    if (emails >= 3)     { score += 10; pts.push(`Abrió ${emails} emails (+10): engagement activo con la marca`); }
+    else if (emails >= 1){ score += 5;  pts.push(`Abrió ${emails} email(s) (+5): algo de engagement`); }
+  }
+  if (!comportamiento || comportamiento.trim().length < 5) {
+    score -= 12; pts.push('Sin datos de comportamiento (-12): no hay señales de intención');
+  }
+
+  score = Math.max(5, Math.min(98, score));
+
+  let categoria, emoji, accion, proximoPaso;
+  if (score >= 80) {
+    categoria = 'Hot'; emoji = '🔥';
+    accion = `Asignar inmediatamente a equipo Enterprise. Crear Task urgente: llamada en las próximas 2-4 horas. Activar secuencia de Fast Track en el Flow.`;
+    proximoPaso = `Llamada consultiva hoy. Preparar deck personalizado para ${industria || 'su industria'}. Objetivo: agendar demo técnica esta semana.`;
+  } else if (score >= 55) {
+    categoria = 'Warm'; emoji = '🟡';
+    accion = `Ingresar a secuencia de nurturing automatizada (Flow: 5 touchpoints en 14 días). Asignar a SDR para seguimiento en 48-72hs.`;
+    proximoPaso = `Email personalizado en 24hs con caso de uso relevante. Segundo contacto a los 3 días. Si abre el email → escalar a Hot.`;
+  } else {
+    categoria = 'Cold'; emoji = '❄';
+    accion = `Marcar como Unqualified. Ingresar a secuencia de educación de largo plazo (newsletter mensual). No asignar vendedor todavía.`;
+    proximoPaso = `Agregar a lista de nurturing pasivo. Reevaluar en 90 días o si reactiva engagement (abre emails, visita el sitio).`;
+  }
+
+  const justificacion = pts.length > 0
+    ? pts.slice(0, 3).map((p, i) => `${i+1}. ${p}`).join('\n')
+    : '1. Datos insuficientes para una evaluación precisa\n2. Recomendado: completar perfil con cargo, empresa y comportamiento';
+
+  return `SCORE: ${score}/100
+CATEGORÍA: ${categoria} ${emoji}
+
+ACCIÓN EN EL FLOW:
+${accion}
+
+JUSTIFICACIÓN (factores principales):
+${justificacion}
+
+PRÓXIMO PASO RECOMENDADO:
+${proximoPaso}`;
+}
+
+// ── Runners con delay simulado ──
 async function runFlowBuilder() {
   const desc = document.getElementById('fb-input').value.trim();
   if (!desc) { document.getElementById('fb-input').focus(); return; }
   const thinking = document.getElementById('fb-thinking');
-  const result = document.getElementById('fb-result');
-  const text = document.getElementById('fb-text');
+  const result   = document.getElementById('fb-result');
+  const text     = document.getElementById('fb-text');
   thinking.classList.add('on');
   result.classList.remove('on');
   text.textContent = '';
-  try {
-    const out = await callClaude(
-      `Sos un arquitecto Salesforce Senior. Respondés siempre en español, de forma clara y estructurada con terminología real de Salesforce (Flow Builder, Apex, SOQL, LWC, Record-Triggered Flow, Scheduled Flow, Governor Limits, Bulkification, etc). Tus respuestas son técnicamente precisas y concisas.`,
-      `Diseñá la estructura de un Salesforce Flow para esta automatización:\n\n"${desc}"\n\nRespondé con:\n1. TIPO DE FLOW (Record-Triggered / Scheduled / Screen Flow)\n2. OBJETO SALESFORCE principal\n3. TRIGGER (criterio de activación exacto con campos estándar)\n4. PASOS DEL FLOW (máx 5-6, indicando: tipo — Decision / Action / Loop / Assignment / Apex Action / Get Records)\n5. CAMPOS SOQL relevantes si aplica\n6. CONSIDERACIONES TÉCNICAS (bulkification, error handling, governor limits)\n\nUsá nombres de campos Salesforce estándar cuando sea posible.`
-    );
-    thinking.classList.remove('on');
-    text.textContent = out;
-    result.classList.add('on');
-  } catch(e) {
-    thinking.classList.remove('on');
-    text.textContent = 'Error al conectar con la API. Verificá la conexión e intentá de nuevo.';
-    result.classList.add('on');
-  }
+  await fakeDelay(1400 + Math.random() * 600);
+  thinking.classList.remove('on');
+  text.textContent = generarFlow(desc);
+  result.classList.add('on');
 }
 
 async function runScoring() {
-  const name = document.getElementById('sc-name').value.trim();
-  const company = document.getElementById('sc-company').value.trim();
-  const industry = document.getElementById('sc-industry').value.trim();
-  const behavior = document.getElementById('sc-behavior').value.trim();
-  if (!name && !company) { document.getElementById('sc-name').focus(); return; }
+  const nombre   = document.getElementById('sc-name').value.trim();
+  const empresa  = document.getElementById('sc-company').value.trim();
+  const industria= document.getElementById('sc-industry').value.trim();
+  const comportamiento = document.getElementById('sc-behavior').value.trim();
+  if (!nombre && !empresa) { document.getElementById('sc-name').focus(); return; }
   const thinking = document.getElementById('sc-thinking');
-  const result = document.getElementById('sc-result');
-  const text = document.getElementById('sc-text');
+  const result   = document.getElementById('sc-result');
+  const text     = document.getElementById('sc-text');
   thinking.classList.add('on');
   result.classList.remove('on');
   text.textContent = '';
-  try {
-    const out = await callClaude(
-      `Sos el motor de Lead Scoring de Salesforce. Analizás leads y devolvés scores, categorías y recomendaciones de acción para Flows de Salesforce. Respondés siempre en español, con formato claro y etiquetas en mayúscula.`,
-      `Analizá este lead y devolvé un score y recomendación de acción en el Flow:\n\nNombre y cargo: ${name || 'No especificado'}\nEmpresa y tamaño: ${company || 'No especificado'}\nIndustria: ${industry || 'No especificada'}\nComportamiento/interacciones: ${behavior || 'Sin datos'}\n\nRespondé con:\nSCORE: [número 0-100]\nCATEGORÍA: [Hot 🔥 / Warm 🟡 / Cold ❄]\nACCIÓN EN EL FLOW: [qué debe ejecutar el Flow con este lead]\nJUSTIFICACIÓN: [2-3 factores principales que explican el score]\nPRÓXIMO PASO: [acción concreta para el equipo de ventas]`
-    );
-    thinking.classList.remove('on');
-    text.textContent = out;
-    result.classList.add('on');
-  } catch(e) {
-    thinking.classList.remove('on');
-    text.textContent = 'Error al conectar con la API. Verificá la conexión e intentá de nuevo.';
-    result.classList.add('on');
-  }
+  await fakeDelay(1200 + Math.random() * 500);
+  thinking.classList.remove('on');
+  text.textContent = calcularScore(nombre, empresa, industria, comportamiento);
+  result.classList.add('on');
 }
 
 function fillScoreExample() {
