@@ -1214,15 +1214,15 @@ function calcularScore(nombre, empresa, industria, comportamiento) {
 
   let categoria, emoji, accion, proximoPaso;
   if (score >= 80) {
-    categoria = 'Hot'; emoji = '🔥';
+    categoria = 'Hot'; emoji = 'HOT';
     accion = `Asignar inmediatamente a equipo Enterprise. Crear Task urgente: llamada en las próximas 2-4 horas. Activar secuencia de Fast Track en el Flow.`;
     proximoPaso = `Llamada consultiva hoy. Preparar deck personalizado para ${industria || 'su industria'}. Objetivo: agendar demo técnica esta semana.`;
   } else if (score >= 55) {
-    categoria = 'Warm'; emoji = '🟡';
+    categoria = 'Warm'; emoji = '[WARN]';
     accion = `Ingresar a secuencia de nurturing automatizada (Flow: 5 touchpoints en 14 días). Asignar a SDR para seguimiento en 48-72hs.`;
     proximoPaso = `Email personalizado en 24hs con caso de uso relevante. Segundo contacto a los 3 días. Si abre el email → escalar a Hot.`;
   } else {
-    categoria = 'Cold'; emoji = '❄';
+    categoria = 'Cold'; emoji = 'COLD';
     accion = `Marcar como Unqualified. Ingresar a secuencia de educación de largo plazo (newsletter mensual). No asignar vendedor todavía.`;
     proximoPaso = `Agregar a lista de nurturing pasivo. Reevaluar en 90 días o si reactiva engagement (abre emails, visita el sitio).`;
   }
@@ -1587,62 +1587,56 @@ const AGENT_DATA = {
 };
 
 function responderAgente(pregunta) {
-  const q = pregunta.toLowerCase();
-  const hot = AGENT_DATA.leads.filter(l=>l.status==='Hot');
-  const warm = AGENT_DATA.leads.filter(l=>l.status==='Warm');
-  const totalOpp = AGENT_DATA.opps.reduce((s,o)=>s+o.amount,0);
+  var q = pregunta.toLowerCase();
+  var hot = AGENT_DATA.leads.filter(function(l){return l.status==='Hot';});
+  var warm = AGENT_DATA.leads.filter(function(l){return l.status==='Warm';});
+  var totalOpp = AGENT_DATA.opps.reduce(function(s,o){return s+o.amount;},0);
 
-  if (/cuántos|cuantos|total.*lead|lead.*total/.test(q)) {
-    return `Tengo **${AGENT_DATA.leads.length} leads** registrados hoy:
-• 🔥 Hot: ${hot.length} (${hot.map(l=>l.name).join(', ')})
-• 🟡 Warm: ${warm.length} leads en nurturing
-• ❄ Cold: 1 descartado
-
-Score promedio: ${Math.round(AGENT_DATA.leads.reduce((s,l)=>s+l.score,0)/AGENT_DATA.leads.length)}/100`;
+  if (/cu.ntos|cuantos|total.*lead|lead.*total/.test(q)) {
+    var hotNames = hot.map(function(l){return l.name;}).join(', ');
+    return 'Tengo <strong>' + AGENT_DATA.leads.length + ' leads</strong> registrados hoy:<br>' +
+      '&#128293; Hot: ' + hot.length + ' (' + hotNames + ')<br>' +
+      '&#128257; Warm: ' + warm.length + ' leads en nurturing<br>' +
+      '&#10052; Cold: 1 descartado<br><br>' +
+      'Score promedio: <strong>' + Math.round(AGENT_DATA.leads.reduce(function(s,l){return s+l.score;},0)/AGENT_DATA.leads.length) + '/100</strong>';
   }
   if (/oportunidad|pipeline|venta|deal/.test(q)) {
-    return `Pipeline actual — **${AGENT_DATA.opps.length} oportunidades abiertas**:
-
-${AGENT_DATA.opps.map(o=>`• ${o.name}: $${o.amount.toLocaleString()} | ${o.stage} | Cierre: ${o.close}`).join('
-')}
-
-💰 Valor total del pipeline: **$${totalOpp.toLocaleString()}**`;
+    var oppLines = AGENT_DATA.opps.map(function(o){
+      return '&#8226; ' + o.name + ': $' + o.amount.toLocaleString() + ' | ' + o.stage + ' | Cierre: ' + o.close;
+    }).join('<br>');
+    return 'Pipeline actual - <strong>' + AGENT_DATA.opps.length + ' oportunidades abiertas</strong>:<br><br>' +
+      oppLines + '<br><br>' +
+      '&#128176; Valor total del pipeline: <strong>$' + totalOpp.toLocaleString() + '</strong>';
   }
   if (/seguimiento|urgente|llamar|priorid/.test(q)) {
-    return `Leads que requieren acción inmediata:
-
-🔥 **${hot[0].name}** (Score ${hot[0].score}) — ${hot[0].action}
-   → Acción: Llamada de seguimiento pendiente hoy
-
-🔥 **${hot[1].name}** (Score ${hot[1].score}) — ${hot[1].action}
-   → Acción: Propuesta técnica solicitada
-
-🟡 **Sofía Ramírez** (Score 71) — No abrió el último email
-   → Acción: Cambiar asunto y reenviar mañana`;
+    return 'Leads que requieren accion inmediata:<br><br>' +
+      '&#128293; <strong>' + (hot[0]?hot[0].name:'Lead A') + '</strong> (Score ' + (hot[0]?hot[0].score:92) + ') - ' + (hot[0]?hot[0].action:'') + '<br>' +
+      '&#8594; Llamada de seguimiento pendiente hoy<br><br>' +
+      '&#128293; <strong>' + (hot[1]?hot[1].name:'Lead B') + '</strong> (Score ' + (hot[1]?hot[1].score:88) + ') - ' + (hot[1]?hot[1].action:'') + '<br>' +
+      '&#8594; Propuesta tecnica solicitada<br><br>' +
+      '&#128257; <strong>Sofia Ramirez</strong> (Score 71) - No abrio el ultimo email<br>' +
+      '&#8594; Cambiar asunto y reenviar manana';
   }
   if (/resumen|resume|summary/.test(q)) {
-    return `📊 **Resumen ejecutivo de hoy:**
-
-• Flows ejecutados: 247 (↑12%)
-• Leads procesados: ${AGENT_DATA.leads.length} (${hot.length} hot)
-• Pipeline total: $${totalOpp.toLocaleString()}
-• Oportunidades en Negotiation: 1
-• Tasa de éxito de flows: 98.4%
-
-✅ Sin errores críticos. 3 leads pendientes de asignación manual.`;
+    return '<strong>Resumen ejecutivo de hoy:</strong><br><br>' +
+      '&#8226; Flows ejecutados: 247 (&#8593;12%)<br>' +
+      '&#8226; Leads procesados: ' + AGENT_DATA.leads.length + ' (' + hot.length + ' hot)<br>' +
+      '&#8226; Pipeline total: $' + totalOpp.toLocaleString() + '<br>' +
+      '&#8226; Oportunidades en Negotiation: 1<br>' +
+      '&#8226; Tasa de exito de flows: 98.4%<br><br>' +
+      '&#9989; Sin errores criticos. 3 leads pendientes de asignacion manual.';
   }
   if (/hola|buenos|hi|hello/.test(q)) {
-    return `¡Hola! Soy el agente Einstein de Leandro. Puedo ayudarte con:
-• Consultas sobre leads y oportunidades
-• Estado del pipeline de ventas
-• Resúmenes ejecutivos
-• Priorización de seguimientos
-
-¿Qué necesitás saber?`;
+    return '&#128075; Hola! Soy el agente Einstein de Leandro. Puedo ayudarte con:<br>' +
+      '&#8226; Consultas sobre leads y oportunidades<br>' +
+      '&#8226; Estado del pipeline de ventas<br>' +
+      '&#8226; Resumenes ejecutivos<br>' +
+      '&#8226; Priorizacion de seguimientos<br><br>' +
+      'Que necesitas saber?';
   }
-  return `Consulté los datos de Salesforce para "${pregunta}".
-
-Encontré ${AGENT_DATA.leads.length} leads activos con pipeline de $${totalOpp.toLocaleString()}. Para una consulta más específica, probá con: "¿Cuántos leads hot tenemos?", "Resume el pipeline" o "¿Qué leads necesitan seguimiento urgente?"`;
+  return 'Consulte los datos de Salesforce para "' + pregunta + '".<br><br>' +
+    'Encontre ' + AGENT_DATA.leads.length + ' leads activos con pipeline de $' + totalOpp.toLocaleString() + '. ' +
+    'Proba con: "Cuantos leads hot tenemos?", "Resume el pipeline" o "Que leads necesitan seguimiento urgente?"';
 }
 
 async function runAgent() {
@@ -1685,31 +1679,31 @@ function analizarApex(code) {
 
   // SOQL en loop
   if (/for\s*\(.*\)\s*\{[^}]*\[SELECT/s.test(code) || lines.some((l,i)=> /\[SELECT/.test(l) && lines.slice(Math.max(0,i-5),i).some(p=>/for\s*\(/.test(p)))) {
-    issues.push({sev:'CRÍTICO 🔴', title:'SOQL dentro de loop', desc:'Query ejecutada por cada iteración → governor limit: 100 SOQL/transacción. Con 101 registros → System.LimitException.', fix:'Mover el SOQL fuera del loop. Usar Map para lookup por Id o Set de IDs.'});
+    issues.push({sev:'CRÍTICO [CRITICO]', title:'SOQL dentro de loop', desc:'Query ejecutada por cada iteración → governor limit: 100 SOQL/transacción. Con 101 registros → System.LimitException.', fix:'Mover el SOQL fuera del loop. Usar Map para lookup por Id o Set de IDs.'});
   }
   // DML en loop
   if (/for\s*\(/.test(code) && /(insert|update|delete|upsert)\s+\w/.test(code)) {
-    issues.push({sev:'CRÍTICO 🔴', title:'DML dentro de loop', desc:'Cada DML consume 1 operación → límite: 150 DML/transacción. Riesgo inmediato con volúmenes reales.', fix:'Acumular registros en List<SObject> dentro del loop, ejecutar DML único después del loop.'});
+    issues.push({sev:'CRÍTICO [CRITICO]', title:'DML dentro de loop', desc:'Cada DML consume 1 operación → límite: 150 DML/transacción. Riesgo inmediato con volúmenes reales.', fix:'Acumular registros en List<SObject> dentro del loop, ejecutar DML único después del loop.'});
   }
   // Sin try/catch
   if (!/(try\s*\{|catch\s*\()/.test(code) && /\[SELECT|callout|http\.send/.test(code.toLowerCase())) {
-    issues.push({sev:'ADVERTENCIA 🟡', title:'Sin manejo de excepciones', desc:'Queries y callouts pueden fallar. Sin try/catch, el error se propaga al usuario sin contexto útil.', fix:'Envolver en try { } catch (QueryException | CalloutException e) { } con logging adecuado.'});
+    issues.push({sev:'ADVERTENCIA [WARN]', title:'Sin manejo de excepciones', desc:'Queries y callouts pueden fallar. Sin try/catch, el error se propaga al usuario sin contexto útil.', fix:'Envolver en try { } catch (QueryException | CalloutException e) { } con logging adecuado.'});
   }
   // Sin bulkification
   if (/Trigger\.new\[0\]|Trigger\.new\.get\(0\)/.test(code)) {
-    issues.push({sev:'CRÍTICO 🔴', title:'Trigger no bulkificado', desc:'Acceso solo al primer registro (index 0). Falla con cargas masivas via Data Loader o integraciones.', fix:'Iterar sobre Trigger.new completo con for(SObject s : Trigger.new) { ... }'});
+    issues.push({sev:'CRÍTICO [CRITICO]', title:'Trigger no bulkificado', desc:'Acceso solo al primer registro (index 0). Falla con cargas masivas via Data Loader o integraciones.', fix:'Iterar sobre Trigger.new completo con for(SObject s : Trigger.new) { ... }'});
   }
   // Sin sharing
   if (/public class/.test(code) && !/with sharing|without sharing|inherited sharing/.test(code)) {
-    issues.push({sev:'ADVERTENCIA 🟡', title:'Sin declaración de sharing', desc:'Clase sin "with sharing" omite las reglas de compartición → posible exposición de datos entre usuarios.', fix:'Usar "public with sharing class X" para respetar OWD y Sharing Rules. "without sharing" solo cuando sea intencional.'});
+    issues.push({sev:'ADVERTENCIA [WARN]', title:'Sin declaración de sharing', desc:'Clase sin "with sharing" omite las reglas de compartición → posible exposición de datos entre usuarios.', fix:'Usar "public with sharing class X" para respetar OWD y Sharing Rules. "without sharing" solo cuando sea intencional.'});
   }
   // Hardcoded IDs
   if (/['"][a-zA-Z0-9]{15,18}['"]/.test(code)) {
-    issues.push({sev:'ADVERTENCIA 🟡', title:'ID hardcodeado detectado', desc:'IDs estáticos en código rompen entre sandboxes, staging y producción.', fix:'Usar Custom Metadata, Custom Labels o Custom Settings para valores configurables por entorno.'});
+    issues.push({sev:'ADVERTENCIA [WARN]', title:'ID hardcodeado detectado', desc:'IDs estáticos en código rompen entre sandboxes, staging y producción.', fix:'Usar Custom Metadata, Custom Labels o Custom Settings para valores configurables por entorno.'});
   }
 
   if (issues.length === 0) {
-    return `✅ CÓDIGO LIMPIO — Sin problemas críticos detectados
+    return `[OK] CÓDIGO LIMPIO — Sin problemas críticos detectados
 
 Buenas prácticas verificadas:
 • Sin SOQL/DML en loops
@@ -1717,13 +1711,13 @@ Buenas prácticas verificadas:
 • Bulkification implementada
 • Sharing configurado
 
-💡 Sugerencias adicionales:
+[TIP] Sugerencias adicionales:
 • Agregar @TestVisible en métodos privados para facilitar testing
 • Cubrir edge cases: listas vacías, null checks
 • Documentar con @param y @return en métodos públicos`;
   }
 
-  let result = `🔍 ANÁLISIS DE CÓDIGO APEX
+  let result = `[ANALISIS] ANÁLISIS DE CÓDIGO APEX
 ${'─'.repeat(40)}
 
 Problemas encontrados: ${issues.length}
@@ -1732,7 +1726,7 @@ Problemas encontrados: ${issues.length}
   issues.forEach((issue, i) => {
     result += `${i+1}. [${issue.sev}] ${issue.title}
    Problema: ${issue.desc}
-   ✅ Fix: ${issue.fix}
+   [OK] Fix: ${issue.fix}
 
 `;
   });
@@ -1741,7 +1735,7 @@ Problemas encontrados: ${issues.length}
   result += `${'─'.repeat(40)}
 Resumen: ${critical} crítico(s), ${issues.length - critical} advertencia(s)
 `;
-  result += critical > 0 ? '⚠️ Resolver críticos ANTES de deploy a producción.' : '💡 Sin críticos. Resolver advertencias antes del code review.';
+  result += critical > 0 ? '[ATENCION] Resolver críticos ANTES de deploy a producción.' : '[TIP] Sin críticos. Resolver advertencias antes del code review.';
   return result;
 }
 
@@ -1758,17 +1752,17 @@ function generarSecurity(scenario, industry, size) {
                        isMid ? 'Private con Sharing Rules por Rol' : 'Public Read Only';
 
   const compliance = isHealthcare ? '
-⚕️ HIPAA Compliance:
+[HEALTH] HIPAA Compliance:
 • Activar Shield Platform Encryption en campos PHI
 • Field Audit Trail habilitado (retención 10 años)
 • Event Monitoring para acceso a datos sensibles' :
                      isFinance ? '
-💳 PCI-DSS / SOX:
+[PCI] PCI-DSS / SOX:
 • Encriptación en campos de datos financieros
 • Audit Trail completo
 • IP Restrictions por perfil' : '';
 
-  return `📐 MODELO DE DATOS Y SEGURIDAD RECOMENDADO
+  return `[MODELO] MODELO DE DATOS Y SEGURIDAD RECOMENDADO
 ${'═'.repeat(44)}
 
 ESCENARIO: ${scenario ? scenario.slice(0,80) + '...' : 'Sistema de gestión empresarial'}
