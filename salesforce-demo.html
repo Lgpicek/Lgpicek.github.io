@@ -508,6 +508,27 @@
         <i class="ti ti-chart-bar" aria-hidden="true"></i>
         <span>Lead Scoring IA</span>
       </button>
+      <div class="sb-section">Senior Toolkit</div>
+      <button class="sb-item" onclick="goPage(this,'rest')" aria-label="REST Integration">
+        <i class="ti ti-plug" aria-hidden="true"></i>
+        <span>REST Integration</span>
+      </button>
+      <button class="sb-item" onclick="goPage(this,'lwc')" aria-label="LWC Builder">
+        <i class="ti ti-components" aria-hidden="true"></i>
+        <span>LWC Builder</span>
+      </button>
+      <button class="sb-item" onclick="goPage(this,'agentforce')" aria-label="Agentforce">
+        <i class="ti ti-robot" aria-hidden="true"></i>
+        <span>Agentforce &#11088;</span>
+      </button>
+      <button class="sb-item" onclick="goPage(this,'debugger')" aria-label="Apex Debugger">
+        <i class="ti ti-bug" aria-hidden="true"></i>
+        <span>Apex Debugger</span>
+      </button>
+      <button class="sb-item" onclick="goPage(this,'security')" aria-label="Security Model">
+        <i class="ti ti-shield-check" aria-hidden="true"></i>
+        <span>Security Model</span>
+      </button>
     </aside>
 
     <!-- MAIN -->
@@ -728,6 +749,191 @@
           </div>
           <div class="ai-thinking" id="sc-thinking"><div class="dots"><div class="d"></div><div class="d"></div><div class="d"></div></div><span>Evaluando perfil del lead con criterios de calificación...</span></div>
           <div class="ai-result" id="sc-result"><div class="result-label">Respuesta IA · Lead Scoring Engine</div><div id="sc-text"></div></div>
+        </div>
+      </div>
+
+
+      <!-- ═══ PAGE: REST INTEGRATION ═══ -->
+      <div class="sf-page" id="page-rest" aria-label="REST Integration Playground">
+        <div class="sec-title" style="margin-bottom:12px;"><i class="ti ti-plug" aria-hidden="true" style="color:#60AFEE;"></i> REST Integration Playground — Apex HTTP Callouts</div>
+        <div class="ai-panel">
+          <div class="ai-panel-head">
+            <div class="ai-panel-ico" style="background:rgba(1,118,211,.12);color:#60AFEE;"><i class="ti ti-plug" aria-hidden="true"></i></div>
+            <div>
+              <div class="ai-panel-title">Generador de Apex HTTP Callout</div>
+              <div class="ai-panel-sub">Describí la integración y genera el código Apex completo con Named Credential, manejo de errores y retry logic</div>
+            </div>
+          </div>
+          <div class="inp-grid">
+            <div>
+              <div class="field-label">Endpoint / Sistema externo</div>
+              <input class="ai-inp" id="rest-endpoint" type="text" placeholder="Ej: https://api.stripe.com/v1/charges">
+            </div>
+            <div>
+              <div class="field-label">Método HTTP</div>
+              <select class="ai-inp" id="rest-method" style="cursor:pointer;">
+                <option>GET</option><option selected>POST</option><option>PUT</option><option>PATCH</option><option>DELETE</option>
+              </select>
+            </div>
+            <div>
+              <div class="field-label">Objeto Salesforce origen</div>
+              <input class="ai-inp" id="rest-object" type="text" placeholder="Ej: Opportunity, Order__c">
+            </div>
+            <div>
+              <div class="field-label">Propósito de la integración</div>
+              <input class="ai-inp" id="rest-purpose" type="text" placeholder="Ej: Crear cargo de pago al cerrar oportunidad">
+            </div>
+          </div>
+          <div class="ai-row">
+            <button class="btn-ai" onclick="runRest()"><i class="ti ti-code" aria-hidden="true"></i> Generar código Apex</button>
+            <button class="btn-ghost" onclick="fillRestExample()"><i class="ti ti-bulb" aria-hidden="true"></i> Cargar ejemplo</button>
+          </div>
+          <div class="ai-thinking" id="rest-thinking"><div class="dots"><div class="d"></div><div class="d"></div><div class="d"></div></div><span>Generando Apex HttpRequest con best practices...</span></div>
+          <div class="ai-result" id="rest-result"><div class="result-label">Código Apex · REST Integration Pattern</div><div id="rest-text" style="font-family:monospace;font-size:11px;white-space:pre;overflow-x:auto;"></div></div>
+        </div>
+      </div>
+
+      <!-- ═══ PAGE: LWC BUILDER ═══ -->
+      <div class="sf-page" id="page-lwc" aria-label="LWC Component Builder">
+        <div class="sec-title" style="margin-bottom:12px;"><i class="ti ti-components" aria-hidden="true" style="color:#B09DD6;"></i> LWC Component Builder — Lightning Web Components</div>
+        <div class="ai-panel" style="border-color:rgba(123,94,167,.3);">
+          <div class="ai-panel-head">
+            <div class="ai-panel-ico" style="background:rgba(123,94,167,.12);color:#B09DD6;"><i class="ti ti-components" aria-hidden="true"></i></div>
+            <div>
+              <div class="ai-panel-title">Describí el componente LWC que necesitás</div>
+              <div class="ai-panel-sub">Genera HTML template, JS controller, CSS y Apex controller con wire adapters y lightning-datatable</div>
+            </div>
+          </div>
+          <div style="margin-bottom:8px;">
+            <div class="field-label">Descripción del componente</div>
+            <textarea class="ai-ta" id="lwc-desc" rows="3" placeholder="Ej: Tabla de oportunidades abiertas con filtro por Stage y botón para marcar como Ganada sin salir de la página. Mostrar nombre, monto y fecha de cierre."></textarea>
+          </div>
+          <div class="inp-grid">
+            <div>
+              <div class="field-label">Objeto Salesforce principal</div>
+              <input class="ai-inp" id="lwc-object" type="text" placeholder="Ej: Opportunity">
+            </div>
+            <div>
+              <div class="field-label">Dónde se muestra</div>
+              <select class="ai-inp" id="lwc-placement" style="cursor:pointer;">
+                <option>Record Page</option><option>App Page</option><option>Home Page</option><option>Utility Bar</option>
+              </select>
+            </div>
+          </div>
+          <div class="ai-row">
+            <button class="btn-ai" onclick="runLwc()" style="background:#7B5EA7;"><i class="ti ti-sparkles" aria-hidden="true"></i> Generar LWC</button>
+            <button class="btn-ghost" onclick="fillLwcExample()"><i class="ti ti-bulb" aria-hidden="true"></i> Cargar ejemplo</button>
+          </div>
+          <div class="ai-thinking" id="lwc-thinking"><div class="dots"><div class="d"></div><div class="d"></div><div class="d"></div></div><span>Generando HTML, JS, CSS y Apex controller...</span></div>
+          <div class="ai-result" id="lwc-result"><div class="result-label">Código LWC · Lightning Web Component</div><div id="lwc-text" style="font-family:monospace;font-size:11px;white-space:pre;overflow-x:auto;"></div></div>
+        </div>
+      </div>
+
+      <!-- ═══ PAGE: AGENTFORCE ═══ -->
+      <div class="sf-page" id="page-agentforce" aria-label="Agentforce Simulator">
+        <div class="sec-title" style="margin-bottom:12px;"><i class="ti ti-robot" aria-hidden="true" style="color:#F0C842;"></i> Agentforce / Einstein Copilot Simulator</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;">
+          <div class="ai-panel" style="border-color:rgba(240,200,66,.25);">
+            <div class="ai-panel-head">
+              <div class="ai-panel-ico" style="background:rgba(240,200,66,.12);color:#F0C842;"><i class="ti ti-robot" aria-hidden="true"></i></div>
+              <div>
+                <div class="ai-panel-title">Agente Einstein activo</div>
+                <div class="ai-panel-sub">Preguntale al agente sobre los datos de Salesforce</div>
+              </div>
+            </div>
+            <div id="agent-chat" style="min-height:160px;max-height:220px;overflow-y:auto;margin-bottom:10px;display:flex;flex-direction:column;gap:8px;padding:4px 0;"></div>
+            <div style="display:flex;gap:6px;">
+              <input class="ai-inp" id="agent-input" type="text" placeholder="Ej: ¿Cuántos leads hot tenemos hoy?" style="flex:1;" onkeydown="if(event.key==='Enter')runAgent()">
+              <button class="btn-ai" onclick="runAgent()" style="padding:7px 14px;white-space:nowrap;"><i class="ti ti-send" aria-hidden="true"></i></button>
+            </div>
+            <div style="margin-top:8px;display:flex;gap:5px;flex-wrap:wrap;">
+              <button class="btn-ghost" style="font-size:11px;padding:4px 8px;" onclick="setAgentQ('¿Cuántas oportunidades cerré este mes?')">Oportunidades del mes</button>
+              <button class="btn-ghost" style="font-size:11px;padding:4px 8px;" onclick="setAgentQ('Resume el pipeline de ventas actual')">Pipeline actual</button>
+              <button class="btn-ghost" style="font-size:11px;padding:4px 8px;" onclick="setAgentQ('¿Qué leads necesitan seguimiento urgente?')">Leads urgentes</button>
+            </div>
+          </div>
+          <div class="ai-panel" style="border-color:rgba(240,200,66,.25);">
+            <div class="ai-panel-head">
+              <div class="ai-panel-ico" style="background:rgba(240,200,66,.12);color:#F0C842;"><i class="ti ti-settings" aria-hidden="true"></i></div>
+              <div>
+                <div class="ai-panel-title">Configuración del Agente</div>
+                <div class="ai-panel-sub">Topics y Actions definidos en Einstein Copilot Builder</div>
+              </div>
+            </div>
+            <div style="font-size:12px;color:var(--text-muted);margin-bottom:8px;font-weight:500;">Topics activos</div>
+            <div style="display:flex;flex-direction:column;gap:6px;">
+              <div style="background:var(--bg);border:.5px solid var(--border);border-radius:6px;padding:8px 10px;">
+                <div style="font-size:12px;font-weight:500;color:var(--text);">Sales Intelligence</div>
+                <div style="font-size:11px;color:var(--text-muted);">Query leads, oportunidades y pipeline en lenguaje natural</div>
+              </div>
+              <div style="background:var(--bg);border:.5px solid var(--border);border-radius:6px;padding:8px 10px;">
+                <div style="font-size:12px;font-weight:500;color:var(--text);">Lead Management</div>
+                <div style="font-size:11px;color:var(--text-muted);">Calificar, asignar y actualizar leads mediante conversación</div>
+              </div>
+              <div style="background:var(--bg);border:.5px solid var(--border);border-radius:6px;padding:8px 10px;">
+                <div style="font-size:12px;font-weight:500;color:var(--text);">Report Generator</div>
+                <div style="font-size:11px;color:var(--text-muted);">Generar resúmenes y reportes on-demand de cualquier objeto</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ═══ PAGE: APEX DEBUGGER ═══ -->
+      <div class="sf-page" id="page-debugger" aria-label="Apex Debugger">
+        <div class="sec-title" style="margin-bottom:12px;"><i class="ti ti-bug" aria-hidden="true" style="color:#F0935A;"></i> Apex Debugger & Code Review — Governor Limits Analyzer</div>
+        <div class="ai-panel" style="border-color:rgba(221,90,14,.25);">
+          <div class="ai-panel-head">
+            <div class="ai-panel-ico" style="background:rgba(221,90,14,.12);color:#F0935A;"><i class="ti ti-bug" aria-hidden="true"></i></div>
+            <div>
+              <div class="ai-panel-title">Pegá tu código Apex para analizar</div>
+              <div class="ai-panel-sub">Detecta violaciones de governor limits, SOQL en loops, falta de bulkification y sugiere la versión corregida</div>
+            </div>
+          </div>
+          <div class="field-label">Código Apex</div>
+          <textarea class="ai-ta" id="debug-code" rows="7" style="font-family:monospace;font-size:12px;" placeholder="Pega tu código Apex aquí...&#10;&#10;Ej:&#10;trigger LeadTrigger on Lead (before insert) {&#10;  for(Lead l : Trigger.new) {&#10;    List&lt;Contact&gt; contacts = [SELECT Id FROM Contact WHERE Email = :l.Email];&#10;    if(contacts.size() &gt; 0) {&#10;      l.addError('Ya existe un contacto con ese email');&#10;    }&#10;  }&#10;}"></textarea>
+          <div class="ai-row">
+            <button class="btn-ai" onclick="runDebugger()" style="background:#DD5A0E;"><i class="ti ti-bug" aria-hidden="true"></i> Analizar código</button>
+            <button class="btn-ghost" onclick="fillDebugExample()"><i class="ti ti-bulb" aria-hidden="true"></i> Cargar ejemplo con bugs</button>
+          </div>
+          <div class="ai-thinking" id="debug-thinking"><div class="dots"><div class="d"></div><div class="d"></div><div class="d"></div></div><span>Analizando governor limits y patrones problemáticos...</span></div>
+          <div class="ai-result" id="debug-result"><div class="result-label">Análisis · Apex Code Review</div><div id="debug-text" style="white-space:pre-wrap;"></div></div>
+        </div>
+      </div>
+
+      <!-- ═══ PAGE: SECURITY MODEL ═══ -->
+      <div class="sf-page" id="page-security" aria-label="Security Model Analyzer">
+        <div class="sec-title" style="margin-bottom:12px;"><i class="ti ti-shield-check" aria-hidden="true" style="color:#5DCAA5;"></i> Security & Data Model Analyzer</div>
+        <div class="ai-panel" style="border-color:var(--border-teal);">
+          <div class="ai-panel-head">
+            <div class="ai-panel-ico"><i class="ti ti-shield-check" aria-hidden="true"></i></div>
+            <div>
+              <div class="ai-panel-title">Describí el escenario de negocio</div>
+              <div class="ai-panel-sub">Genera el modelo de datos recomendado con Profiles, Permission Sets, Sharing Rules y Field-Level Security</div>
+            </div>
+          </div>
+          <div style="margin-bottom:8px;">
+            <div class="field-label">Escenario de negocio</div>
+            <textarea class="ai-ta" id="sec-scenario" rows="3" placeholder="Ej: Sistema de gestión de contratos donde los vendedores solo pueden ver sus propios contratos, los managers ven los de su equipo, y el equipo legal ve todos. Los montos son confidenciales para ventas."></textarea>
+          </div>
+          <div class="inp-grid">
+            <div>
+              <div class="field-label">Industria / Contexto</div>
+              <input class="ai-inp" id="sec-industry" type="text" placeholder="Ej: Healthcare, Finanzas, Retail B2B">
+            </div>
+            <div>
+              <div class="field-label">Cantidad aproximada de usuarios</div>
+              <select class="ai-inp" id="sec-size" style="cursor:pointer;">
+                <option>1-50 usuarios</option><option selected>50-500 usuarios</option><option>500-5000 usuarios</option><option>5000+ usuarios (Enterprise)</option>
+              </select>
+            </div>
+          </div>
+          <div class="ai-row">
+            <button class="btn-ai" onclick="runSecurity()"><i class="ti ti-shield-check" aria-hidden="true"></i> Generar modelo de seguridad</button>
+            <button class="btn-ghost" onclick="fillSecExample()"><i class="ti ti-bulb" aria-hidden="true"></i> Cargar ejemplo</button>
+          </div>
+          <div class="ai-thinking" id="sec-thinking"><div class="dots"><div class="d"></div><div class="d"></div><div class="d"></div></div><span>Diseñando modelo de datos y esquema de seguridad...</span></div>
+          <div class="ai-result" id="sec-result"><div class="result-label">Diseño · Security & Data Model</div><div id="sec-text" style="white-space:pre-wrap;"></div></div>
         </div>
       </div>
 
@@ -1078,6 +1284,685 @@ function fillScoreExample() {
   document.getElementById('sc-industry').value = 'Tecnología financiera (B2B SaaS)';
   document.getElementById('sc-behavior').value = 'Abrió 3 emails, visitó página de pricing 2 veces, descargó whitepaper técnico';
 }
+
+
+/* ══════════════════════════════════════════
+   MOTOR OFFLINE: REST INTEGRATION
+   ══════════════════════════════════════════ */
+function generarRest(endpoint, method, objeto, purpose) {
+  const nc = (endpoint || 'ExternalAPI').replace(/https?:\/\//,'').split('/')[0].replace(/[^a-zA-Z0-9]/g,'_');
+  const className = objeto ? objeto.replace(/__c$/,'') + 'IntegrationService' : 'ExternalAPIService';
+  const bodyFields = method !== 'GET' ? `
+        // Construir payload con datos del registro
+        Map<String, Object> payload = new Map<String, Object>{
+            'id'        => record.Id,
+            'name'      => record.Name,
+            'timestamp' => String.valueOf(DateTime.now()),
+            'source'    => 'Salesforce'
+        };
+        req.setBody(JSON.serialize(payload));` : '';
+
+  return `// ═══════════════════════════════════════════════
+// Apex HTTP Callout — ${purpose || 'Integración REST'}
+// Objeto: ${objeto || 'SObject'} → ${endpoint || 'API Externa'}
+// Patrón: Named Credential + Future method (async)
+// ═══════════════════════════════════════════════
+
+public class ${className} {
+
+    // Named Credential configurada en Setup → Security → Named Credentials
+    private static final String NAMED_CREDENTIAL = 'callout:${nc}';
+
+    // @future para evitar Mixed DML + ejecutar callout async
+    @future(callout=true)
+    public static void sendToExternalSystem(Id recordId) {
+        try {
+            ${objeto || 'SObject'} record = [
+                SELECT Id, Name, Status__c, Amount, CreatedDate
+                FROM ${objeto || 'SObject'}
+                WHERE Id = :recordId
+                LIMIT 1
+            ];
+
+            HttpRequest req = new HttpRequest();
+            req.setEndpoint(NAMED_CREDENTIAL + '${(endpoint || '/api/endpoint').replace(/https?:\/\/[^\/]+/,'')}');
+            req.setMethod('${method || 'POST'}');
+            req.setHeader('Content-Type', 'application/json');
+            req.setHeader('Accept', 'application/json');
+            req.setTimeout(30000); // 30s — governor limit máx 120s${bodyFields}
+
+            Http http = new Http();
+            HttpResponse res = http.send(req);
+
+            if (res.getStatusCode() == 200 || res.getStatusCode() == 201) {
+                // Parsear respuesta
+                Map<String, Object> responseMap =
+                    (Map<String, Object>) JSON.deserializeUntyped(res.getBody());
+
+                // Actualizar registro con datos de respuesta
+                ${objeto || 'SObject'} toUpdate = new ${objeto || 'SObject'}(Id = recordId);
+                // toUpdate.ExternalId__c = (String) responseMap.get('id');
+                // toUpdate.SyncStatus__c = 'Synced';
+                update toUpdate;
+
+                System.debug('SUCCESS: ' + res.getBody());
+            } else {
+                // Manejar error HTTP — loggear para auditoría
+                handleError(recordId, res.getStatusCode(), res.getBody());
+            }
+
+        } catch (CalloutException e) {
+            handleError(recordId, 0, 'CalloutException: ' + e.getMessage());
+        } catch (QueryException e) {
+            handleError(recordId, 0, 'Record not found: ' + e.getMessage());
+        }
+    }
+
+    // ── Retry logic: reintenta hasta 3 veces con backoff ──
+    @future(callout=true)
+    public static void sendWithRetry(Id recordId, Integer attempt) {
+        if (attempt > 3) {
+            handleError(recordId, 0, 'Max retries exceeded');
+            return;
+        }
+        // Implementar retry con Queueable para control granular
+        // System.enqueueJob(new RetryCalloutJob(recordId, attempt + 1));
+    }
+
+    private static void handleError(Id recId, Integer code, String msg) {
+        System.debug(LoggingLevel.ERROR, 'Integration error [' + code + ']: ' + msg);
+        // Insert Integration_Log__c para auditoría
+        insert new Integration_Log__c(
+            Record_Id__c  = recId,
+            Error_Code__c = String.valueOf(code),
+            Message__c    = msg.left(255),
+            Timestamp__c  = DateTime.now()
+        );
+    }
+}
+
+// ── Test Class (mínimo 75% coverage para deploy) ──
+@IsTest
+public class ${className}Test {
+    @IsTest static void testSuccess() {
+        Test.setMock(HttpCalloutMock.class, new MockSuccess());
+        Test.startTest();
+        ${className}.sendToExternalSystem([SELECT Id FROM ${objeto || 'Account'} LIMIT 1].Id);
+        Test.stopTest();
+        // Assert Integration_Log__c NOT inserted
+    }
+
+    private class MockSuccess implements HttpCalloutMock {
+        public HttpResponse respond(HttpRequest req) {
+            HttpResponse res = new HttpResponse();
+            res.setStatusCode(200);
+            res.setBody('{"id":"ext-001","status":"created"}');
+            return res;
+        }
+    }
+}`;
+}
+
+/* ══════════════════════════════════════════
+   MOTOR OFFLINE: LWC BUILDER
+   ══════════════════════════════════════════ */
+function generarLwc(desc, objeto, placement) {
+  const obj = objeto || 'Opportunity';
+  const compName = obj.toLowerCase().replace(/__c$/,'') + 'Manager';
+  const targets = {
+    'Record Page': 'lightning__RecordPage',
+    'App Page': 'lightning__AppPage',
+    'Home Page': 'lightning__HomePage',
+    'Utility Bar': 'lightning__UtilityBar'
+  };
+  const target = targets[placement] || 'lightning__RecordPage';
+  const needsId = placement === 'Record Page';
+
+  return `<!-- ═══════════════════════════════════════
+  LWC: ${compName}
+  Objeto: ${obj} | Placement: ${placement}
+  ${desc ? '// ' + desc.slice(0,60) : ''}
+  ═══════════════════════════════════════ -->
+
+<!-- ${compName}.html -->
+<template>
+    <lightning-card title="${obj} Manager" icon-name="standard:${obj.toLowerCase().replace(/__c$/,'')}">
+        <div class="slds-p-around_medium">
+
+            <!-- Barra de filtros -->
+            <div class="slds-grid slds-gutters slds-m-bottom_small">
+                <div class="slds-col">
+                    <lightning-combobox
+                        label="Filtrar por Stage"
+                        value={selectedStage}
+                        options={stageOptions}
+                        onchange={handleStageChange}>
+                    </lightning-combobox>
+                </div>
+                <div class="slds-col slds-align-bottom">
+                    <lightning-button
+                        label="Actualizar"
+                        icon-name="utility:refresh"
+                        onclick={handleRefresh}>
+                    </lightning-button>
+                </div>
+            </div>
+
+            <!-- Tabla de datos -->
+            <template if:true={records}>
+                <lightning-datatable
+                    key-field="Id"
+                    data={records}
+                    columns={columns}
+                    onrowaction={handleRowAction}>
+                </lightning-datatable>
+            </template>
+
+            <template if:true={isLoading}>
+                <lightning-spinner alternative-text="Cargando..."></lightning-spinner>
+            </template>
+
+            <template if:true={error}>
+                <p class="slds-text-color_error">{error}</p>
+            </template>
+        </div>
+    </lightning-card>
+</template>
+
+// ─────────────────────────────────────────
+// ${compName}.js
+// ─────────────────────────────────────────
+import { LightningElement, wire, track, api } from 'lwc';
+import { ShowToastEvent } from 'lightning/platformShowToastEvent';
+import { refreshApex } from '@salesforce/apex';
+import getRecords from '@salesforce/apex/${compName}Controller.getRecords';
+import updateRecord from '@salesforce/apex/${compName}Controller.updateRecord';
+
+export default class ${compName} extends LightningElement {
+    ${needsId ? '@api recordId;' : ''}
+    @track selectedStage = 'All';
+    @track isLoading = false;
+    @track error;
+    wiredResult; // guardamos para refreshApex
+
+    columns = [
+        { label: 'Nombre',         fieldName: 'Name',      type: 'text' },
+        { label: 'Monto',          fieldName: 'Amount',    type: 'currency' },
+        { label: 'Fecha cierre',   fieldName: 'CloseDate', type: 'date' },
+        { label: 'Stage',          fieldName: 'StageName', type: 'text' },
+        { type: 'action', typeAttributes: {
+            rowActions: [
+                { label: 'Marcar Ganada', name: 'won' },
+                { label: 'Ver detalle',   name: 'view' }
+            ]
+        }}
+    ];
+
+    stageOptions = [
+        { label: 'Todos',       value: 'All' },
+        { label: 'Prospecting', value: 'Prospecting' },
+        { label: 'Negotiation', value: 'Negotiation' },
+        { label: 'Closed Won',  value: 'Closed Won' }
+    ];
+
+    @wire(getRecords, { stage: '$selectedStage'${needsId ? ', recordId: "$recordId"' : ''} })
+    wiredRecords(result) {
+        this.wiredResult = result;
+        if (result.data)  { this.records = result.data; this.error = undefined; }
+        if (result.error) { this.error = result.error.body.message; }
+    }
+
+    handleStageChange(event) { this.selectedStage = event.detail.value; }
+
+    async handleRowAction(event) {
+        const { action, row } = event.detail;
+        if (action.name === 'won') {
+            this.isLoading = true;
+            try {
+                await updateRecord({ recordId: row.Id, stage: 'Closed Won' });
+                this.dispatchEvent(new ShowToastEvent({
+                    title: '¡Oportunidad ganada!',
+                    message: row.Name + ' marcada como Closed Won',
+                    variant: 'success'
+                }));
+                await refreshApex(this.wiredResult);
+            } catch(e) {
+                this.dispatchEvent(new ShowToastEvent({ title: 'Error', message: e.body.message, variant: 'error' }));
+            } finally { this.isLoading = false; }
+        }
+    }
+
+    handleRefresh() { refreshApex(this.wiredResult); }
+}
+
+// ─────────────────────────────────────────
+// ${compName}Controller.cls  (Apex)
+// ─────────────────────────────────────────
+public with sharing class ${compName}Controller {
+
+    @AuraEnabled(cacheable=true)
+    public static List<${obj}> getRecords(String stage) {
+        String q = 'SELECT Id, Name, Amount, CloseDate, StageName FROM ${obj} WHERE StageName != \'Closed Lost\'';
+        if (stage != null && stage != 'All') q += ' AND StageName = :stage';
+        q += ' ORDER BY CloseDate ASC LIMIT 200';
+        return (List<${obj}>) Database.query(q);
+    }
+
+    @AuraEnabled
+    public static void updateRecord(Id recordId, String stage) {
+        ${obj} rec = new ${obj}(Id=recordId, StageName=stage);
+        update rec; // with sharing aplica FLS y CRUD automáticamente
+    }
+}
+
+// ─────────────────────────────────────────
+// ${compName}.js-meta.xml
+// ─────────────────────────────────────────
+<?xml version="1.0" encoding="UTF-8"?>
+<LightningComponentBundle xmlns="http://soap.sforce.com/2006/04/metadata">
+    <apiVersion>59.0</apiVersion>
+    <isExposed>true</isExposed>
+    <targets>
+        <target>${target}</target>
+    </targets>
+</LightningComponentBundle>`;
+}
+
+/* ══════════════════════════════════════════
+   MOTOR OFFLINE: AGENTFORCE
+   ══════════════════════════════════════════ */
+const AGENT_DATA = {
+  leads: [
+    {name:'María González', score:92, company:'TechCorp SA', status:'Hot', action:'Asignada a Carlos R.'},
+    {name:'Ana Torres', score:88, company:'GlobalMed', status:'Hot', action:'Asignada a Laura M.'},
+    {name:'Sofía Ramírez', score:71, company:'UNC', status:'Warm', action:'En nurturing'},
+    {name:'Juan Pérez', score:67, company:'Innovar.io', status:'Warm', action:'En nurturing'},
+    {name:'Roberto Lima', score:34, company:'Startup AR', status:'Cold', action:'Descartado'},
+  ],
+  opps: [
+    {name:'TechCorp Enterprise', amount:48000, stage:'Negotiation', close:'2025-07-30'},
+    {name:'GlobalMed Professional', amount:22000, stage:'Proposal', close:'2025-08-15'},
+    {name:'UNC Education Plan', amount:8500, stage:'Prospecting', close:'2025-09-01'},
+  ]
+};
+
+function responderAgente(pregunta) {
+  const q = pregunta.toLowerCase();
+  const hot = AGENT_DATA.leads.filter(l=>l.status==='Hot');
+  const warm = AGENT_DATA.leads.filter(l=>l.status==='Warm');
+  const totalOpp = AGENT_DATA.opps.reduce((s,o)=>s+o.amount,0);
+
+  if (/cuántos|cuantos|total.*lead|lead.*total/.test(q)) {
+    return `Tengo **${AGENT_DATA.leads.length} leads** registrados hoy:
+• 🔥 Hot: ${hot.length} (${hot.map(l=>l.name).join(', ')})
+• 🟡 Warm: ${warm.length} leads en nurturing
+• ❄ Cold: 1 descartado
+
+Score promedio: ${Math.round(AGENT_DATA.leads.reduce((s,l)=>s+l.score,0)/AGENT_DATA.leads.length)}/100`;
+  }
+  if (/oportunidad|pipeline|venta|deal/.test(q)) {
+    return `Pipeline actual — **${AGENT_DATA.opps.length} oportunidades abiertas**:
+
+${AGENT_DATA.opps.map(o=>`• ${o.name}: $${o.amount.toLocaleString()} | ${o.stage} | Cierre: ${o.close}`).join('
+')}
+
+💰 Valor total del pipeline: **$${totalOpp.toLocaleString()}**`;
+  }
+  if (/seguimiento|urgente|llamar|priorid/.test(q)) {
+    return `Leads que requieren acción inmediata:
+
+🔥 **${hot[0].name}** (Score ${hot[0].score}) — ${hot[0].action}
+   → Acción: Llamada de seguimiento pendiente hoy
+
+🔥 **${hot[1].name}** (Score ${hot[1].score}) — ${hot[1].action}
+   → Acción: Propuesta técnica solicitada
+
+🟡 **Sofía Ramírez** (Score 71) — No abrió el último email
+   → Acción: Cambiar asunto y reenviar mañana`;
+  }
+  if (/resumen|resume|summary/.test(q)) {
+    return `📊 **Resumen ejecutivo de hoy:**
+
+• Flows ejecutados: 247 (↑12%)
+• Leads procesados: ${AGENT_DATA.leads.length} (${hot.length} hot)
+• Pipeline total: $${totalOpp.toLocaleString()}
+• Oportunidades en Negotiation: 1
+• Tasa de éxito de flows: 98.4%
+
+✅ Sin errores críticos. 3 leads pendientes de asignación manual.`;
+  }
+  if (/hola|buenos|hi|hello/.test(q)) {
+    return `¡Hola! Soy el agente Einstein de Leandro. Puedo ayudarte con:
+• Consultas sobre leads y oportunidades
+• Estado del pipeline de ventas
+• Resúmenes ejecutivos
+• Priorización de seguimientos
+
+¿Qué necesitás saber?`;
+  }
+  return `Consulté los datos de Salesforce para "${pregunta}".
+
+Encontré ${AGENT_DATA.leads.length} leads activos con pipeline de $${totalOpp.toLocaleString()}. Para una consulta más específica, probá con: "¿Cuántos leads hot tenemos?", "Resume el pipeline" o "¿Qué leads necesitan seguimiento urgente?"`;
+}
+
+async function runAgent() {
+  const input = document.getElementById('agent-input');
+  const chat = document.getElementById('agent-chat');
+  const q = input.value.trim();
+  if (!q) return;
+  input.value = '';
+
+  // User bubble
+  chat.innerHTML += `<div style="align-self:flex-end;background:rgba(1,118,211,.15);border:.5px solid rgba(1,118,211,.3);border-radius:8px 8px 2px 8px;padding:7px 11px;font-size:12px;color:var(--text);max-width:85%;">${q}</div>`;
+
+  // Thinking
+  const thinkId = 'think-' + Date.now();
+  chat.innerHTML += `<div id="${thinkId}" style="align-self:flex-start;background:var(--surface2);border-radius:8px;padding:7px 11px;font-size:12px;color:var(--text-muted);display:flex;gap:6px;align-items:center;"><span>Einstein pensando</span><span style="display:flex;gap:3px;"><span class="d"></span><span class="d"></span><span class="d"></span></span></div>`;
+  chat.scrollTop = chat.scrollHeight;
+
+  await fakeDelay(900 + Math.random()*400);
+  document.getElementById(thinkId)?.remove();
+
+  const resp = responderAgente(q);
+  const formatted = resp.replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>').replace(/
+/g,'<br>');
+  chat.innerHTML += `<div style="align-self:flex-start;background:rgba(240,200,66,.07);border:.5px solid rgba(240,200,66,.2);border-radius:8px 8px 8px 2px;padding:8px 11px;font-size:12px;color:var(--text);max-width:90%;line-height:1.6;">${formatted}</div>`;
+  chat.scrollTop = chat.scrollHeight;
+}
+
+function setAgentQ(q) {
+  document.getElementById('agent-input').value = q;
+  runAgent();
+}
+
+/* ══════════════════════════════════════════
+   MOTOR OFFLINE: APEX DEBUGGER
+   ══════════════════════════════════════════ */
+function analizarApex(code) {
+  const issues = [];
+  const lines = code.split('
+');
+
+  // SOQL en loop
+  if (/for\s*\(.*\)\s*\{[^}]*\[SELECT/s.test(code) || lines.some((l,i)=> /\[SELECT/.test(l) && lines.slice(Math.max(0,i-5),i).some(p=>/for\s*\(/.test(p)))) {
+    issues.push({sev:'CRÍTICO 🔴', title:'SOQL dentro de loop', desc:'Query ejecutada por cada iteración → governor limit: 100 SOQL/transacción. Con 101 registros → System.LimitException.', fix:'Mover el SOQL fuera del loop. Usar Map para lookup por Id o Set de IDs.'});
+  }
+  // DML en loop
+  if (/for\s*\(/.test(code) && /(insert|update|delete|upsert)\s+\w/.test(code)) {
+    issues.push({sev:'CRÍTICO 🔴', title:'DML dentro de loop', desc:'Cada DML consume 1 operación → límite: 150 DML/transacción. Riesgo inmediato con volúmenes reales.', fix:'Acumular registros en List<SObject> dentro del loop, ejecutar DML único después del loop.'});
+  }
+  // Sin try/catch
+  if (!/(try\s*\{|catch\s*\()/.test(code) && /\[SELECT|callout|http\.send/.test(code.toLowerCase())) {
+    issues.push({sev:'ADVERTENCIA 🟡', title:'Sin manejo de excepciones', desc:'Queries y callouts pueden fallar. Sin try/catch, el error se propaga al usuario sin contexto útil.', fix:'Envolver en try { } catch (QueryException | CalloutException e) { } con logging adecuado.'});
+  }
+  // Sin bulkification
+  if (/Trigger\.new\[0\]|Trigger\.new\.get\(0\)/.test(code)) {
+    issues.push({sev:'CRÍTICO 🔴', title:'Trigger no bulkificado', desc:'Acceso solo al primer registro (index 0). Falla con cargas masivas via Data Loader o integraciones.', fix:'Iterar sobre Trigger.new completo con for(SObject s : Trigger.new) { ... }'});
+  }
+  // Sin sharing
+  if (/public class/.test(code) && !/with sharing|without sharing|inherited sharing/.test(code)) {
+    issues.push({sev:'ADVERTENCIA 🟡', title:'Sin declaración de sharing', desc:'Clase sin "with sharing" omite las reglas de compartición → posible exposición de datos entre usuarios.', fix:'Usar "public with sharing class X" para respetar OWD y Sharing Rules. "without sharing" solo cuando sea intencional.'});
+  }
+  // Hardcoded IDs
+  if (/['"][a-zA-Z0-9]{15,18}['"]/.test(code)) {
+    issues.push({sev:'ADVERTENCIA 🟡', title:'ID hardcodeado detectado', desc:'IDs estáticos en código rompen entre sandboxes, staging y producción.', fix:'Usar Custom Metadata, Custom Labels o Custom Settings para valores configurables por entorno.'});
+  }
+
+  if (issues.length === 0) {
+    return `✅ CÓDIGO LIMPIO — Sin problemas críticos detectados
+
+Buenas prácticas verificadas:
+• Sin SOQL/DML en loops
+• Manejo de excepciones presente
+• Bulkification implementada
+• Sharing configurado
+
+💡 Sugerencias adicionales:
+• Agregar @TestVisible en métodos privados para facilitar testing
+• Cubrir edge cases: listas vacías, null checks
+• Documentar con @param y @return en métodos públicos`;
+  }
+
+  let result = `🔍 ANÁLISIS DE CÓDIGO APEX
+${'─'.repeat(40)}
+
+Problemas encontrados: ${issues.length}
+
+`;
+  issues.forEach((issue, i) => {
+    result += `${i+1}. [${issue.sev}] ${issue.title}
+   Problema: ${issue.desc}
+   ✅ Fix: ${issue.fix}
+
+`;
+  });
+
+  const critical = issues.filter(i=>i.sev.includes('CRÍTICO')).length;
+  result += `${'─'.repeat(40)}
+Resumen: ${critical} crítico(s), ${issues.length - critical} advertencia(s)
+`;
+  result += critical > 0 ? '⚠️ Resolver críticos ANTES de deploy a producción.' : '💡 Sin críticos. Resolver advertencias antes del code review.';
+  return result;
+}
+
+/* ══════════════════════════════════════════
+   MOTOR OFFLINE: SECURITY MODEL
+   ══════════════════════════════════════════ */
+function generarSecurity(scenario, industry, size) {
+  const isHealthcare = /health|salud|médic|clinic|hospital/.test((industry||'').toLowerCase());
+  const isFinance = /financ|banco|fintech|seguro|invers/.test((industry||'').toLowerCase());
+  const isEnterprise = size && size.includes('5000');
+  const isMid = size && (size.includes('500-5') || size.includes('50-500'));
+
+  const sharingModel = isEnterprise ? 'Private (Enterprise — máximo control, sharing explícito)' :
+                       isMid ? 'Private con Sharing Rules por Rol' : 'Public Read Only';
+
+  const compliance = isHealthcare ? '
+⚕️ HIPAA Compliance:
+• Activar Shield Platform Encryption en campos PHI
+• Field Audit Trail habilitado (retención 10 años)
+• Event Monitoring para acceso a datos sensibles' :
+                     isFinance ? '
+💳 PCI-DSS / SOX:
+• Encriptación en campos de datos financieros
+• Audit Trail completo
+• IP Restrictions por perfil' : '';
+
+  return `📐 MODELO DE DATOS Y SEGURIDAD RECOMENDADO
+${'═'.repeat(44)}
+
+ESCENARIO: ${scenario ? scenario.slice(0,80) + '...' : 'Sistema de gestión empresarial'}
+INDUSTRIA: ${industry || 'General'} | ESCALA: ${size || '50-500 usuarios'}
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+1. MODELO DE DATOS (Objetos y Relaciones)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Objetos principales sugeridos:
+• Contract__c (Master)
+  - Status__c (Picklist: Draft/Active/Expired)
+  - Amount__c (Currency — FLS restringido)
+  - Owner (Lookup: User — base del sharing)
+  - Team__c (Lookup: Team__c)
+
+• Contract_Line__c (Detail de Contract__c)
+  - Quantity__c, Unit_Price__c
+  - Total__c (Formula field)
+
+Relaciones:
+  Contract__c →(Master-Detail)→ Contract_Line__c
+  Contract__c →(Lookup)→ Account
+  Contract__c →(Lookup)→ Opportunity
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+2. ORG-WIDE DEFAULTS (OWD)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Contract__c: ${sharingModel}
+Account:     Private
+Opportunity: Private
+Lead:        Private
+
+→ Principio: más restrictivo posible, ampliar con Sharing Rules
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+3. JERARQUÍA DE ROLES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+CEO / Admin
+├── Sales Director (ve todo su equipo)
+│   ├── Sales Manager — Región Norte
+│   │   ├── Sales Rep 1
+│   │   └── Sales Rep 2
+│   └── Sales Manager — Región Sur
+├── Legal Team (acceso explícito via Permission Set)
+└── Finance (read-only via Sharing Rules)
+
+→ Roles controlan visibilidad vertical (arriba ve abajo)
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+4. PROFILES Y PERMISSION SETS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Profiles (acceso base mínimo):
+• Sales Profile: CRUD en Lead/Opportunity, Read en Account
+• Manager Profile: Sales + Reports + Dashboards
+• Legal Profile: Read-only base
+• Finance Profile: Read-only base + Amount__c visible
+
+Permission Sets (acceso adicional granular):
+• PS_Contract_Editor: Edit en Contract__c (asignar a equipo legal)
+• PS_Amount_Viewer: FLS Read en Amount__c (asignar a Finance y Managers)
+• PS_Admin_Reports: Manage Reports (asignar a managers)
+
+Field-Level Security crítico:
+• Amount__c → Oculto para Sales Reps, visible para Managers+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+5. SHARING RULES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Criteria-Based Sharing Rules:
+• "Legal Access All": Contract__c Status__c != 'Draft'
+  → Compartir con Legal Team (Read/Write)
+• "Finance Read Contracts": Contract__c Status__c = 'Active'
+  → Compartir con Finance (Read Only)
+• "Manager Team View": basado en jerarquía de roles
+  → Automático via Role Hierarchy
+${compliance}
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+6. VALIDACIÓN EN APEX (with sharing)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+public with sharing class ContractService {
+    // "with sharing" aplica OWD + Sharing Rules automáticamente
+    // El usuario solo ve los registros a los que tiene acceso
+    public static List<Contract__c> getContracts() {
+        return [SELECT Id, Name, Status__c FROM Contract__c];
+    }
+}`;
+}
+
+/* ── Runners con delay simulado ── */
+async function runRest() {
+  const ep = document.getElementById('rest-endpoint').value.trim();
+  const method = document.getElementById('rest-method').value;
+  const obj = document.getElementById('rest-object').value.trim();
+  const purpose = document.getElementById('rest-purpose').value.trim();
+  if (!ep && !obj) { document.getElementById('rest-endpoint').focus(); return; }
+  const thinking = document.getElementById('rest-thinking');
+  const result = document.getElementById('rest-result');
+  const text = document.getElementById('rest-text');
+  thinking.classList.add('on'); result.classList.remove('on'); text.textContent = '';
+  await fakeDelay(1300 + Math.random()*500);
+  thinking.classList.remove('on');
+  text.textContent = generarRest(ep, method, obj, purpose);
+  result.classList.add('on');
+}
+
+async function runLwc() {
+  const desc = document.getElementById('lwc-desc').value.trim();
+  const obj = document.getElementById('lwc-object').value.trim();
+  const placement = document.getElementById('lwc-placement').value;
+  if (!desc && !obj) { document.getElementById('lwc-desc').focus(); return; }
+  const thinking = document.getElementById('lwc-thinking');
+  const result = document.getElementById('lwc-result');
+  const text = document.getElementById('lwc-text');
+  thinking.classList.add('on'); result.classList.remove('on'); text.textContent = '';
+  await fakeDelay(1500 + Math.random()*600);
+  thinking.classList.remove('on');
+  text.textContent = generarLwc(desc, obj, placement);
+  result.classList.add('on');
+}
+
+async function runDebugger() {
+  const code = document.getElementById('debug-code').value.trim();
+  if (!code) { document.getElementById('debug-code').focus(); return; }
+  const thinking = document.getElementById('debug-thinking');
+  const result = document.getElementById('debug-result');
+  const text = document.getElementById('debug-text');
+  thinking.classList.add('on'); result.classList.remove('on'); text.textContent = '';
+  await fakeDelay(1000 + Math.random()*400);
+  thinking.classList.remove('on');
+  text.textContent = analizarApex(code);
+  result.classList.add('on');
+}
+
+async function runSecurity() {
+  const scenario = document.getElementById('sec-scenario').value.trim();
+  const industry = document.getElementById('sec-industry').value.trim();
+  const size = document.getElementById('sec-size').value;
+  if (!scenario) { document.getElementById('sec-scenario').focus(); return; }
+  const thinking = document.getElementById('sec-thinking');
+  const result = document.getElementById('sec-result');
+  const text = document.getElementById('sec-text');
+  thinking.classList.add('on'); result.classList.remove('on'); text.textContent = '';
+  await fakeDelay(1400 + Math.random()*500);
+  thinking.classList.remove('on');
+  text.textContent = generarSecurity(scenario, industry, size);
+  result.classList.add('on');
+}
+
+/* ── Ejemplos de carga ── */
+function fillRestExample() {
+  document.getElementById('rest-endpoint').value = 'https://api.stripe.com/v1/charges';
+  document.getElementById('rest-method').value = 'POST';
+  document.getElementById('rest-object').value = 'Opportunity';
+  document.getElementById('rest-purpose').value = 'Crear cargo de pago al cerrar oportunidad como Closed Won';
+}
+function fillLwcExample() {
+  document.getElementById('lwc-desc').value = 'Tabla de oportunidades abiertas con filtro por Stage y botón para marcar como Ganada sin salir de la página. Mostrar nombre, monto y fecha de cierre.';
+  document.getElementById('lwc-object').value = 'Opportunity';
+  document.getElementById('lwc-placement').value = 'Record Page';
+}
+function fillDebugExample() {
+  document.getElementById('debug-code').value = `trigger LeadTrigger on Lead (before insert, before update) {
+  for(Lead l : Trigger.new) {
+    // SOQL dentro del loop - problema grave
+    List<Contact> dups = [SELECT Id FROM Contact WHERE Email = :l.Email];
+    if(dups.size() > 0) {
+      l.addError('Ya existe un contacto con ese email');
+    }
+    // DML dentro del loop - otro problema
+    Task t = new Task(Subject='Seguimiento', WhoId=l.Id);
+    insert t;
+  }
+}`;
+}
+function fillSecExample() {
+  document.getElementById('sec-scenario').value = 'Sistema de gestión de contratos donde los vendedores solo ven sus propios contratos, los managers ven los de su equipo, y el equipo legal ve todos. Los montos son confidenciales para ventas.';
+  document.getElementById('sec-industry').value = 'Tecnología B2B SaaS';
+  document.getElementById('sec-size').value = '50-500 usuarios';
+}
+
+// Init Agentforce chat con mensaje de bienvenida
+(function initAgent() {
+  const chat = document.getElementById('agent-chat');
+  if (!chat) return;
+  chat.innerHTML = `<div style="align-self:flex-start;background:rgba(240,200,66,.07);border:.5px solid rgba(240,200,66,.2);border-radius:8px 8px 8px 2px;padding:8px 11px;font-size:12px;color:var(--text);max-width:90%;line-height:1.6;">¡Hola! Soy el agente Einstein. Preguntame sobre leads, oportunidades o el pipeline de ventas.</div>`;
+})();
+
 </script>
 </body>
 </html>
