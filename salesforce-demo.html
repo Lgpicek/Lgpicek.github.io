@@ -485,47 +485,47 @@
     <!-- SIDEBAR -->
     <aside class="sf-sidebar" aria-label="Menú lateral">
       <div class="sb-section">Automatizaciones</div>
-      <button class="sb-item" data-page="flows" active" aria-label="Flows activos">
+      <button class="sb-item active" data-page="flows" aria-label="Flows activos">
         <i class="ti ti-arrows-transfer-down" aria-hidden="true"></i>
         <span>Flows activos</span>
         <span class="sb-count">4</span>
       </button>
-      <button class="sb-item" data-page="leads"" aria-label="Leads">
+      <button class="sb-item" data-page="leads" aria-label="Leads">
         <i class="ti ti-user-plus" aria-hidden="true"></i>
         <span>Leads</span>
         <span class="sb-count red">3</span>
       </button>
-      <button class="sb-item" data-page="logs"" aria-label="Registro ejecuciones">
+      <button class="sb-item" data-page="logs" aria-label="Registro ejecuciones">
         <i class="ti ti-list-check" aria-hidden="true"></i>
         <span>Registro ejecuciones</span>
       </button>
       <div class="sb-section">Herramientas IA</div>
-      <button class="sb-item" data-page="ai-builder"" aria-label="Flow Builder IA">
+      <button class="sb-item" data-page="ai-builder" aria-label="Flow Builder IA">
         <i class="ti ti-brain" aria-hidden="true"></i>
         <span>Flow Builder IA</span>
       </button>
-      <button class="sb-item" data-page="ai-score"" aria-label="Lead Scoring IA">
+      <button class="sb-item" data-page="ai-score" aria-label="Lead Scoring IA">
         <i class="ti ti-chart-bar" aria-hidden="true"></i>
         <span>Lead Scoring IA</span>
       </button>
       <div class="sb-section">Senior Toolkit</div>
-      <button class="sb-item" data-page="rest"" aria-label="REST Integration">
+      <button class="sb-item" data-page="rest" aria-label="REST Integration">
         <i class="ti ti-plug" aria-hidden="true"></i>
         <span>REST Integration</span>
       </button>
-      <button class="sb-item" data-page="lwc"" aria-label="LWC Builder">
+      <button class="sb-item" data-page="lwc" aria-label="LWC Builder">
         <i class="ti ti-components" aria-hidden="true"></i>
         <span>LWC Builder</span>
       </button>
-      <button class="sb-item" data-page="agentforce"" aria-label="Agentforce">
+      <button class="sb-item" data-page="agentforce" aria-label="Agentforce">
         <i class="ti ti-robot" aria-hidden="true"></i>
         <span>Agentforce &#11088;</span>
       </button>
-      <button class="sb-item" data-page="debugger"" aria-label="Apex Debugger">
+      <button class="sb-item" data-page="debugger" aria-label="Apex Debugger">
         <i class="ti ti-bug" aria-hidden="true"></i>
         <span>Apex Debugger</span>
       </button>
-      <button class="sb-item" data-page="security"" aria-label="Security Model">
+      <button class="sb-item" data-page="security" aria-label="Security Model">
         <i class="ti ti-shield-check" aria-hidden="true"></i>
         <span>Security Model</span>
       </button>
@@ -1288,299 +1288,480 @@ function fillScoreExample() {
    MOTOR OFFLINE: REST INTEGRATION
    ══════════════════════════════════════════ */
 function generarRest(endpoint, method, objeto, purpose) {
-  const nc = (endpoint || 'ExternalAPI').replace(/https?:\/\//,'').split('/')[0].replace(/[^a-zA-Z0-9]/g,'_');
-  const className = objeto ? objeto.replace(/__c$/,'') + 'IntegrationService' : 'ExternalAPIService';
-  const bodyFields = method !== 'GET' ? `
-        // Construir payload con datos del registro
-        Map<String, Object> payload = new Map<String, Object>{
-            'id'        => record.Id,
-            'name'      => record.Name,
-            'timestamp' => String.valueOf(DateTime.now()),
-            'source'    => 'Salesforce'
-        };
-        req.setBody(JSON.serialize(payload));` : '';
-
-  return `// ═══════════════════════════════════════════════
-// Apex HTTP Callout — ${purpose || 'Integración REST'}
-// Objeto: ${objeto || 'SObject'} → ${endpoint || 'API Externa'}
-// Patrón: Named Credential + Future method (async)
-// ═══════════════════════════════════════════════
-
-public class ${className} {
-
-    // Named Credential configurada en Setup → Security → Named Credentials
-    private static final String NAMED_CREDENTIAL = 'callout:${nc}';
-
-    // @future para evitar Mixed DML + ejecutar callout async
-    @future(callout=true)
-    public static void sendToExternalSystem(Id recordId) {
-        try {
-            ${objeto || 'SObject'} record = [
-                SELECT Id, Name, Status__c, Amount, CreatedDate
-                FROM ${objeto || 'SObject'}
-                WHERE Id = :recordId
-                LIMIT 1
-            ];
-
-            HttpRequest req = new HttpRequest();
-            req.setEndpoint(NAMED_CREDENTIAL + '${(endpoint || '/api/endpoint').replace(/https?:\/\/[^\/]+/,'')}');
-            req.setMethod('${method || 'POST'}');
-            req.setHeader('Content-Type', 'application/json');
-            req.setHeader('Accept', 'application/json');
-            req.setTimeout(30000); // 30s — governor limit máx 120s${bodyFields}
-
-            Http http = new Http();
-            HttpResponse res = http.send(req);
-
-            if (res.getStatusCode() == 200 || res.getStatusCode() == 201) {
-                // Parsear respuesta
-                Map<String, Object> responseMap =
-                    (Map<String, Object>) JSON.deserializeUntyped(res.getBody());
-
-                // Actualizar registro con datos de respuesta
-                ${objeto || 'SObject'} toUpdate = new ${objeto || 'SObject'}(Id = recordId);
-                // toUpdate.ExternalId__c = (String) responseMap.get('id');
-                // toUpdate.SyncStatus__c = 'Synced';
-                update toUpdate;
-
-                System.debug('SUCCESS: ' + res.getBody());
-            } else {
-                // Manejar error HTTP — loggear para auditoría
-                handleError(recordId, res.getStatusCode(), res.getBody());
-            }
-
-        } catch (CalloutException e) {
-            handleError(recordId, 0, 'CalloutException: ' + e.getMessage());
-        } catch (QueryException e) {
-            handleError(recordId, 0, 'Record not found: ' + e.getMessage());
-        }
+  var ep = endpoint || 'https://api.external.com/v1/resource';
+  var met = method || 'POST';
+  var obj = objeto || 'Opportunity';
+  var purp = purpose || 'Integracion REST';
+  
+  // Compute these BEFORE the template literal - no regex inside ${}
+  var ncRaw = ep.replace('https://','').replace('http://','').split('/')[0];
+  var nc = ncRaw.replace(/[^a-zA-Z0-9]/g,'_') || 'ExternalAPI';
+  var className = obj.replace(/__c$/, '') + 'IntegrationService';
+  
+  // Compute path safely
+  var epPath = '/api/endpoint';
+  try {
+    var urlParts = ep.split('//');
+    if (urlParts.length > 1) {
+      var afterProto = urlParts[1];
+      var slashIdx = afterProto.indexOf('/');
+      epPath = slashIdx >= 0 ? afterProto.slice(slashIdx) : '/';
     }
+  } catch(e) { epPath = '/api/endpoint'; }
 
-    // ── Retry logic: reintenta hasta 3 veces con backoff ──
-    @future(callout=true)
-    public static void sendWithRetry(Id recordId, Integer attempt) {
-        if (attempt > 3) {
-            handleError(recordId, 0, 'Max retries exceeded');
-            return;
-        }
-        // Implementar retry con Queueable para control granular
-        // System.enqueueJob(new RetryCalloutJob(recordId, attempt + 1));
-    }
+  var bodyBlock = met !== 'GET' ? [
+    '        // Construir payload con datos del registro',
+    '        Map<String, Object> payload = new Map<String, Object>{',
+    "            'id'        => record.Id,",
+    "            'name'      => record.Name,",
+    "            'timestamp' => String.valueOf(DateTime.now()),",
+    "            'source'    => 'Salesforce'",
+    '        };',
+    '        req.setBody(JSON.serialize(payload));'
+  ].join('
+') : '';
 
-    private static void handleError(Id recId, Integer code, String msg) {
-        System.debug(LoggingLevel.ERROR, 'Integration error [' + code + ']: ' + msg);
-        // Insert Integration_Log__c para auditoría
-        insert new Integration_Log__c(
-            Record_Id__c  = recId,
-            Error_Code__c = String.valueOf(code),
-            Message__c    = msg.left(255),
-            Timestamp__c  = DateTime.now()
-        );
-    }
+  var lines = [
+    '// Apex HTTP Callout - ' + purp,
+    '// Objeto: ' + obj + ' -> ' + ep,
+    '// Patron: Named Credential + Future method (async)',
+    '',
+    'public class ' + className + ' {',
+    '',
+    "    private static final String NAMED_CREDENTIAL = 'callout:" + nc + "';",
+    '',
+    '    @future(callout=true)',
+    '    public static void sendToExternalSystem(Id recordId) {',
+    '        try {',
+    '            ' + obj + ' record = [',
+    '                SELECT Id, Name, Status__c, Amount, CreatedDate',
+    '                FROM ' + obj,
+    '                WHERE Id = :recordId LIMIT 1',
+    '            ];',
+    '',
+    '            HttpRequest req = new HttpRequest();',
+    "            req.setEndpoint(NAMED_CREDENTIAL + '" + epPath + "');",
+    "            req.setMethod('" + met + "');",
+    "            req.setHeader('Content-Type', 'application/json');",
+    "            req.setHeader('Accept', 'application/json');",
+    '            req.setTimeout(30000);',
+    bodyBlock,
+    '',
+    '            Http http = new Http();',
+    '            HttpResponse res = http.send(req);',
+    '',
+    '            if (res.getStatusCode() == 200 || res.getStatusCode() == 201) {',
+    '                Map<String, Object> responseMap =',
+    '                    (Map<String, Object>) JSON.deserializeUntyped(res.getBody());',
+    '                // Update record with external response data',
+    '                ' + obj + ' toUpdate = new ' + obj + '(Id = recordId);',
+    "                // toUpdate.ExternalId__c = (String) responseMap.get('id');",
+    "                // toUpdate.SyncStatus__c = 'Synced';",
+    '                update toUpdate;',
+    "                System.debug('SUCCESS: ' + res.getBody());",
+    '            } else {',
+    '                handleError(recordId, res.getStatusCode(), res.getBody());',
+    '            }',
+    '        } catch (CalloutException e) {',
+    "            handleError(recordId, 0, 'CalloutException: ' + e.getMessage());",
+    '        } catch (QueryException e) {',
+    "            handleError(recordId, 0, 'Record not found: ' + e.getMessage());",
+    '        }',
+    '    }',
+    '',
+    '    private static void handleError(Id recId, Integer code, String msg) {',
+    "        System.debug(LoggingLevel.ERROR, 'Integration error [' + code + ']: ' + msg);",
+    '        insert new Integration_Log__c(',
+    '            Record_Id__c  = recId,',
+    '            Error_Code__c = String.valueOf(code),',
+    '            Message__c    = msg.left(255),',
+    '            Timestamp__c  = DateTime.now()',
+    '        );',
+    '    }',
+    '}',
+    '',
+    '// Test Class',
+    '@IsTest',
+    'public class ' + className + 'Test {',
+    '    @IsTest static void testSuccess() {',
+    '        Test.setMock(HttpCalloutMock.class, new MockSuccess());',
+    '        Test.startTest();',
+    '        // ' + className + '.sendToExternalSystem(recordId);',
+    '        Test.stopTest();',
+    '    }',
+    '    private class MockSuccess implements HttpCalloutMock {',
+    '        public HttpResponse respond(HttpRequest req) {',
+    '            HttpResponse res = new HttpResponse();',
+    '            res.setStatusCode(200);',
+    '            res.setBody('{"id":"ext-001","status":"created"}');',
+    '            return res;',
+    '        }',
+    '    }',
+    '}'
+  ];
+
+  return lines.join('
+');
 }
 
-// ── Test Class (mínimo 75% coverage para deploy) ──
-@IsTest
-public class ${className}Test {
-    @IsTest static void testSuccess() {
-        Test.setMock(HttpCalloutMock.class, new MockSuccess());
-        Test.startTest();
-        ${className}.sendToExternalSystem([SELECT Id FROM ${objeto || 'Account'} LIMIT 1].Id);
-        Test.stopTest();
-        // Assert Integration_Log__c NOT inserted
-    }
 
-    private class MockSuccess implements HttpCalloutMock {
-        public HttpResponse respond(HttpRequest req) {
-            HttpResponse res = new HttpResponse();
-            res.setStatusCode(200);
-            res.setBody('{"id":"ext-001","status":"created"}');
-            return res;
-        }
-    }
-}`;
+
+/* ══════════════════════════════════════
+   MOTORES OFFLINE: runners y helpers
+   ══════════════════════════════════════ */
+
+function fakeDelay(ms) { return new Promise(function(r){ setTimeout(r, ms); }); }
+
+/* ── Lead Scoring ── */
+function calcularScore(nombre, empresa, industria, comportamiento) {
+  var score = 40;
+  var pts = [];
+  var n = (nombre||'').toLowerCase();
+  var e = (empresa||'').toLowerCase();
+  var i = (industria||'').toLowerCase();
+  var c = (comportamiento||'').toLowerCase();
+
+  if (/ceo|cto|coo|cfo|director|vp |founder|owner/.test(n))      { score += 28; pts.push('Cargo C-Level o Director (+28): decisor con poder de compra'); }
+  else if (/gerente|manager|jefe|head of|lider/.test(n))           { score += 16; pts.push('Cargo de gestion media (+16): influenciador en la decision'); }
+  else if (/developer|analista|junior|estudiante|pasante/.test(n)) { score -= 10; pts.push('Cargo tecnico operativo (-10): bajo poder de decision'); }
+
+  var empMatch = e.match(/(\d+)\s*(empleados?|personas?)/);
+  if (empMatch) {
+    var emp = parseInt(empMatch[1], 10);
+    if (emp >= 500)      { score += 22; pts.push('Empresa ' + emp + '+ empleados (+22): enterprise'); }
+    else if (emp >= 100) { score += 14; pts.push('Empresa ' + emp + ' empleados (+14): mid-market'); }
+    else if (emp >= 20)  { score += 7;  pts.push('Empresa ' + emp + ' empleados (+7): SMB'); }
+    else                 { score -= 5;  pts.push('Empresa muy pequena (-5): presupuesto limitado'); }
+  }
+
+  if (/tecnolog|software|saas|fintech/.test(i))    { score += 12; pts.push('Industria tech/SaaS (+12): alta adopcion digital'); }
+  else if (/educacion|ong|gobierno/.test(i))         { score -= 8;  pts.push('Sector publico (-8): ciclos de compra largos'); }
+
+  if (/pricing|precios|planes/.test(c))             { score += 18; pts.push('Visito pricing (+18): intencion de compra directa'); }
+  if (/whitepaper|ebook|descarg/.test(c))           { score += 10; pts.push('Descargo contenido tecnico (+10): interes profundo'); }
+  if (/demo|trial/.test(c))                         { score += 15; pts.push('Solicito demo (+15): evaluacion activa'); }
+  var emailMatch = c.match(/(\d+)\s*emails?/);
+  if (emailMatch && parseInt(emailMatch[1],10) >= 3) { score += 10; pts.push('Abrio ' + emailMatch[1] + ' emails (+10): engagement activo'); }
+
+  score = Math.max(5, Math.min(98, score));
+
+  var cat, accion, proximo;
+  if (score >= 80) {
+    cat = 'HOT - Score: ' + score + '/100';
+    accion = 'Asignar a equipo Enterprise. Llamada en las proximas 2-4 horas. Activar Fast Track en el Flow.';
+    proximo = 'Llamada consultiva hoy. Preparar deck personalizado. Objetivo: agendar demo tecnica esta semana.';
+  } else if (score >= 55) {
+    cat = 'WARM - Score: ' + score + '/100';
+    accion = 'Ingresar a secuencia de nurturing (5 touchpoints en 14 dias). Asignar a SDR para seguimiento en 48-72hs.';
+    proximo = 'Email personalizado en 24hs con caso de uso relevante. Segundo contacto a los 3 dias.';
+  } else {
+    cat = 'COLD - Score: ' + score + '/100';
+    accion = 'Marcar como Unqualified. Ingresar a secuencia de educacion de largo plazo.';
+    proximo = 'Agregar a nurturing pasivo. Reevaluar en 90 dias.';
+  }
+
+  var just = pts.length > 0
+    ? pts.slice(0,3).map(function(p,i){ return (i+1) + '. ' + p; }).join('
+')
+    : '1. Datos insuficientes - completar perfil del lead';
+
+  return 'SCORE: ' + score + '/100
+CATEGORIA: ' + cat + '
+
+ACCION EN EL FLOW:
+' + accion + '
+
+JUSTIFICACION:
+' + just + '
+
+PROXIMO PASO:
+' + proximo;
 }
 
-/* ══════════════════════════════════════════
-   MOTOR OFFLINE: LWC BUILDER
-   ══════════════════════════════════════════ */
+/* ── Flow Builder ── */
+function generarFlow(descripcion) {
+  var t = (descripcion||'').toLowerCase();
+  var tipo = /cada|diario|semanal|hora|programad/.test(t) ? 'Scheduled Flow' :
+             /formulario|pantalla|usuario ingresa/.test(t) ? 'Screen Flow' : 'Record-Triggered Flow';
+  var obj = /lead/.test(t) ? 'Lead' : /case|caso|ticket/.test(t) ? 'Case' :
+            /oportunidad|opportunity/.test(t) ? 'Opportunity' : 'Objeto personalizado';
+  var pasos = [];
+  var n = 1;
+  if (/cada|diario|hora/.test(t)) pasos.push(n++ + '. Get Records (SOQL) -> obtener registros que cumplan la condicion temporal');
+  if (/si |cuando |mayor|menor|score/.test(t)) pasos.push(n++ + '. Decision -> evaluar criterios de negocio (rama Si / rama No)');
+  if (/apex|calculo|integracion|api/.test(t)) pasos.push(n++ + '. Apex Action -> @InvocableMethod para logica compleja o callout externo');
+  if (/email|correo|notif/.test(t)) pasos.push(n++ + '. Send Email Alert -> template personalizado con campos dinamicos');
+  if (/tarea|task|recordatorio/.test(t)) pasos.push(n++ + '. Create Records -> Task con Subject, ActivityDate y OwnerId');
+  if (/asignar|owner|equipo/.test(t)) pasos.push(n++ + '. Assignment + Update Record -> asignar OwnerId segun regla de negocio');
+  pasos.push(n++ + '. Update Record -> actualizar campos de estado y auditoria (Status, LastProcessedDate__c)');
+
+  return '1. TIPO DE FLOW
+' + tipo +
+    '
+
+2. OBJETO SALESFORCE
+' + obj +
+    '
+
+3. TRIGGER
+Criterio de activacion segun campos del objeto. Entry Criteria: campos requeridos != NULL.' +
+    '
+
+4. PASOS DEL FLOW
+' + pasos.join('
+') +
+    '
+
+5. SOQL RELEVANTE
+SELECT Id, Name, Status__c FROM ' + obj + ' WHERE IsActive = true LIMIT 200' +
+    '
+
+6. CONSIDERACIONES TECNICAS
+- Bulkification: nunca DML dentro de loops (limite: 150 DML/transaccion)
+- Fault Path en cada Apex Action para capturar excepciones
+- Test Class con minimo 75% coverage para deploy a produccion';
+}
+
+/* ── LWC Builder ── */
 function generarLwc(desc, objeto, placement) {
-  const obj = objeto || 'Opportunity';
-  const compName = obj.toLowerCase().replace(/__c$/,'') + 'Manager';
-  const targets = {
-    'Record Page': 'lightning__RecordPage',
-    'App Page': 'lightning__AppPage',
-    'Home Page': 'lightning__HomePage',
-    'Utility Bar': 'lightning__UtilityBar'
-  };
-  const target = targets[placement] || 'lightning__RecordPage';
-  const needsId = placement === 'Record Page';
+  var obj = objeto || 'Opportunity';
+  var comp = obj.toLowerCase().replace(/__c$/, '') + 'Manager';
+  var targets = {'Record Page':'lightning__RecordPage','App Page':'lightning__AppPage','Home Page':'lightning__HomePage','Utility Bar':'lightning__UtilityBar'};
+  var target = targets[placement] || 'lightning__RecordPage';
 
-  return `<!-- ═══════════════════════════════════════
-  LWC: ${compName}
-  Objeto: ${obj} | Placement: ${placement}
-  ${desc ? '// ' + desc.slice(0,60) : ''}
-  ═══════════════════════════════════════ -->
+  return '<!-- ' + comp + '.html -->
+' +
+'<template>
+' +
+'    <lightning-card title="' + obj + ' Manager" icon-name="standard:' + obj.toLowerCase().replace(/__c$/,'') + '">
+' +
+'        <div class="slds-p-around_medium">
+' +
+'            <lightning-combobox label="Filtrar por Stage" value={selectedStage}
+' +
+'                options={stageOptions} onchange={handleStageChange}>
+' +
+'            </lightning-combobox>
+' +
+'            <template if:true={records}>
+' +
+'                <lightning-datatable key-field="Id" data={records}
+' +
+'                    columns={columns} onrowaction={handleRowAction}>
+' +
+'                </lightning-datatable>
+' +
+'            </template>
+' +
+'            <template if:true={isLoading}>
+' +
+'                <lightning-spinner alternative-text="Cargando..."></lightning-spinner>
+' +
+'            </template>
+' +
+'        </div>
+' +
+'    </lightning-card>
+' +
+'</template>
 
-<!-- ${compName}.html -->
-<template>
-    <lightning-card title="${obj} Manager" icon-name="standard:${obj.toLowerCase().replace(/__c$/,'')}">
-        <div class="slds-p-around_medium">
+' +
+'// ' + comp + '.js
+' +
+"import { LightningElement, wire, track, api } from 'lwc';
+" +
+"import { ShowToastEvent } from 'lightning/platformShowToastEvent';
+" +
+"import { refreshApex } from '@salesforce/apex';
+" +
+"import getRecords from '@salesforce/apex/" + comp + "Controller.getRecords';
 
-            <!-- Barra de filtros -->
-            <div class="slds-grid slds-gutters slds-m-bottom_small">
-                <div class="slds-col">
-                    <lightning-combobox
-                        label="Filtrar por Stage"
-                        value={selectedStage}
-                        options={stageOptions}
-                        onchange={handleStageChange}>
-                    </lightning-combobox>
-                </div>
-                <div class="slds-col slds-align-bottom">
-                    <lightning-button
-                        label="Actualizar"
-                        icon-name="utility:refresh"
-                        onclick={handleRefresh}>
-                    </lightning-button>
-                </div>
-            </div>
+" +
+'export default class ' + comp + ' extends LightningElement {
+' +
+'    @track selectedStage = "All";
+' +
+'    @track isLoading = false;
+' +
+'    wiredResult;
 
-            <!-- Tabla de datos -->
-            <template if:true={records}>
-                <lightning-datatable
-                    key-field="Id"
-                    data={records}
-                    columns={columns}
-                    onrowaction={handleRowAction}>
-                </lightning-datatable>
-            </template>
+' +
+'    columns = [
+' +
+'        { label: "Nombre", fieldName: "Name", type: "text" },
+' +
+'        { label: "Monto", fieldName: "Amount", type: "currency" },
+' +
+'        { label: "Cierre", fieldName: "CloseDate", type: "date" },
+' +
+'        { type: "action", typeAttributes: { rowActions: [{ label: "Ver", name: "view" }] } }
+' +
+'    ];
 
-            <template if:true={isLoading}>
-                <lightning-spinner alternative-text="Cargando..."></lightning-spinner>
-            </template>
+' +
+'    @wire(getRecords, { stage: "$selectedStage" })
+' +
+'    wiredRecords(result) {
+' +
+'        this.wiredResult = result;
+' +
+'        if (result.data) this.records = result.data;
+' +
+'    }
 
-            <template if:true={error}>
-                <p class="slds-text-color_error">{error}</p>
-            </template>
-        </div>
-    </lightning-card>
-</template>
+' +
+'    handleStageChange(e) { this.selectedStage = e.detail.value; }
+' +
+'    handleRefresh() { refreshApex(this.wiredResult); }
+' +
+'}
 
-// ─────────────────────────────────────────
-// ${compName}.js
-// ─────────────────────────────────────────
-import { LightningElement, wire, track, api } from 'lwc';
-import { ShowToastEvent } from 'lightning/platformShowToastEvent';
-import { refreshApex } from '@salesforce/apex';
-import getRecords from '@salesforce/apex/${compName}Controller.getRecords';
-import updateRecord from '@salesforce/apex/${compName}Controller.updateRecord';
+' +
+'// ' + comp + 'Controller.cls
+' +
+'public with sharing class ' + comp + 'Controller {
+' +
+'    @AuraEnabled(cacheable=true)
+' +
+'    public static List<' + obj + '> getRecords(String stage) {
+' +
+"        String q = 'SELECT Id, Name, Amount, CloseDate, StageName FROM " + obj + " WHERE StageName != \'Closed Lost\'';
+" +
+"        if (stage != null && stage != 'All') q += ' AND StageName = :stage';
+" +
+"        q += ' ORDER BY CloseDate ASC LIMIT 200';
+" +
+'        return (List<' + obj + '>) Database.query(q);
+' +
+'    }
+' +
+'}
 
-export default class ${compName} extends LightningElement {
-    ${needsId ? '@api recordId;' : ''}
-    @track selectedStage = 'All';
-    @track isLoading = false;
-    @track error;
-    wiredResult; // guardamos para refreshApex
-
-    columns = [
-        { label: 'Nombre',         fieldName: 'Name',      type: 'text' },
-        { label: 'Monto',          fieldName: 'Amount',    type: 'currency' },
-        { label: 'Fecha cierre',   fieldName: 'CloseDate', type: 'date' },
-        { label: 'Stage',          fieldName: 'StageName', type: 'text' },
-        { type: 'action', typeAttributes: {
-            rowActions: [
-                { label: 'Marcar Ganada', name: 'won' },
-                { label: 'Ver detalle',   name: 'view' }
-            ]
-        }}
-    ];
-
-    stageOptions = [
-        { label: 'Todos',       value: 'All' },
-        { label: 'Prospecting', value: 'Prospecting' },
-        { label: 'Negotiation', value: 'Negotiation' },
-        { label: 'Closed Won',  value: 'Closed Won' }
-    ];
-
-    @wire(getRecords, { stage: '$selectedStage'${needsId ? ', recordId: "$recordId"' : ''} })
-    wiredRecords(result) {
-        this.wiredResult = result;
-        if (result.data)  { this.records = result.data; this.error = undefined; }
-        if (result.error) { this.error = result.error.body.message; }
-    }
-
-    handleStageChange(event) { this.selectedStage = event.detail.value; }
-
-    async handleRowAction(event) {
-        const { action, row } = event.detail;
-        if (action.name === 'won') {
-            this.isLoading = true;
-            try {
-                await updateRecord({ recordId: row.Id, stage: 'Closed Won' });
-                this.dispatchEvent(new ShowToastEvent({
-                    title: '¡Oportunidad ganada!',
-                    message: row.Name + ' marcada como Closed Won',
-                    variant: 'success'
-                }));
-                await refreshApex(this.wiredResult);
-            } catch(e) {
-                this.dispatchEvent(new ShowToastEvent({ title: 'Error', message: e.body.message, variant: 'error' }));
-            } finally { this.isLoading = false; }
-        }
-    }
-
-    handleRefresh() { refreshApex(this.wiredResult); }
+' +
+'// ' + comp + '.js-meta.xml
+' +
+'<LightningComponentBundle>
+' +
+'    <apiVersion>59.0</apiVersion>
+' +
+'    <isExposed>true</isExposed>
+' +
+'    <targets><target>' + target + '</target></targets>
+' +
+'</LightningComponentBundle>';
 }
 
-// ─────────────────────────────────────────
-// ${compName}Controller.cls  (Apex)
-// ─────────────────────────────────────────
-public with sharing class ${compName}Controller {
+/* ── Apex Debugger ── */
+function analizarApex(code) {
+  var issues = [];
+  if (/for\s*\(/.test(code) && /\[SELECT/.test(code)) issues.push({sev:'[CRITICO]', t:'SOQL dentro de loop', d:'Governor limit: 100 SOQL/transaccion. Con 101 registros -> LimitException.', f:'Mover SOQL fuera del loop. Usar Map<Id, SObject> para lookup.'});
+  if (/for\s*\(/.test(code) && /(insert|update|delete|upsert)\s+\w/.test(code)) issues.push({sev:'[CRITICO]', t:'DML dentro de loop', d:'Limite: 150 DML/transaccion. Falla con carga masiva.', f:'Acumular en List<SObject> dentro del loop. Ejecutar DML unico despues.'});
+  if (!/(try\s*\{|catch\s*\()/.test(code) && /\[SELECT|callout/.test(code)) issues.push({sev:'[ADVERTENCIA]', t:'Sin manejo de excepciones', d:'Queries pueden fallar. Sin try/catch el error llega sin contexto al usuario.', f:'Envolver en try { } catch (QueryException e) { }'});
+  if (/Trigger\.new\[0\]/.test(code)) issues.push({sev:'[CRITICO]', t:'Trigger no bulkificado', d:'Acceso solo al primer registro. Falla con Data Loader.', f:'Iterar con for(SObject s : Trigger.new) { ... }'});
+  if (/public class/.test(code) && !/with sharing|without sharing/.test(code)) issues.push({sev:'[ADVERTENCIA]', t:'Sin declaracion de sharing', d:'Omite reglas de comparticion -> posible exposicion de datos.', f:'Usar "public with sharing class X".'});
+  if (/['"][a-zA-Z0-9]{15,18}['"]/.test(code)) issues.push({sev:'[ADVERTENCIA]', t:'ID hardcodeado', d:'IDs estaticos rompen entre sandboxes y produccion.', f:'Usar Custom Metadata o Custom Labels.'});
+  if (issues.length === 0) return '[OK] CODIGO LIMPIO - Sin problemas criticos detectados.
 
-    @AuraEnabled(cacheable=true)
-    public static List<${obj}> getRecords(String stage) {
-        String q = 'SELECT Id, Name, Amount, CloseDate, StageName FROM ${obj} WHERE StageName != \'Closed Lost\'';
-        if (stage != null && stage != 'All') q += ' AND StageName = :stage';
-        q += ' ORDER BY CloseDate ASC LIMIT 200';
-        return (List<${obj}>) Database.query(q);
-    }
+Buenas practicas verificadas:
+- Sin SOQL/DML en loops
+- Manejo de excepciones presente
+- Bulkification implementada
 
-    @AuraEnabled
-    public static void updateRecord(Id recordId, String stage) {
-        ${obj} rec = new ${obj}(Id=recordId, StageName=stage);
-        update rec; // with sharing aplica FLS y CRUD automáticamente
-    }
+[TIP] Agregar @TestVisible en metodos privados para facilitar testing.';
+  var r = 'ANALISIS APEX - ' + issues.length + ' problema(s) encontrado(s)
+' + '-'.repeat(40) + '
+
+';
+  issues.forEach(function(iss, i) { r += (i+1) + '. ' + iss.sev + ' ' + iss.t + '
+   Problema: ' + iss.d + '
+   Fix: ' + iss.f + '
+
+'; });
+  var crit = issues.filter(function(i){return i.sev.includes('CRITICO');}).length;
+  r += '-'.repeat(40) + '
+' + crit + ' critico(s), ' + (issues.length-crit) + ' advertencia(s)
+';
+  r += crit > 0 ? '[ATENCION] Resolver criticos ANTES de deploy a produccion.' : '[OK] Sin criticos. Revisar advertencias en code review.';
+  return r;
 }
 
-// ─────────────────────────────────────────
-// ${compName}.js-meta.xml
-// ─────────────────────────────────────────
-<?xml version="1.0" encoding="UTF-8"?>
-<LightningComponentBundle xmlns="http://soap.sforce.com/2006/04/metadata">
-    <apiVersion>59.0</apiVersion>
-    <isExposed>true</isExposed>
-    <targets>
-        <target>${target}</target>
-    </targets>
-</LightningComponentBundle>`;
+/* ── Security Model ── */
+function generarSecurity(scenario, industry, size) {
+  var isHC = /health|salud|medic/.test((industry||'').toLowerCase());
+  var isFin = /financ|banco|fintech/.test((industry||'').toLowerCase());
+  var isEnt = (size||'').includes('5000');
+  var owd = isEnt ? 'Private (Enterprise)' : 'Private con Sharing Rules por Rol';
+
+  var lines = [
+    'MODELO DE DATOS Y SEGURIDAD',
+    '='.repeat(40),
+    '',
+    'ESCENARIO: ' + (scenario||'').slice(0,80),
+    'INDUSTRIA: ' + (industry||'General') + ' | ESCALA: ' + (size||'50-500 usuarios'),
+    '',
+    '1. ORG-WIDE DEFAULTS',
+    '-'.repeat(30),
+    'Objeto principal: ' + owd,
+    'Account: Private | Opportunity: Private | Lead: Private',
+    '-> Principio: mas restrictivo posible, ampliar con Sharing Rules',
+    '',
+    '2. JERARQUIA DE ROLES',
+    '-'.repeat(30),
+    'CEO / Admin',
+    '|-- Director Comercial (ve todo su equipo)',
+    '    |-- Manager Region Norte',
+    '    |   |-- Sales Rep 1, Sales Rep 2',
+    '    |-- Manager Region Sur',
+    '|-- Equipo Legal (acceso via Permission Set)',
+    '|-- Finanzas (read-only via Sharing Rules)',
+    '',
+    '3. PROFILES Y PERMISSION SETS',
+    '-'.repeat(30),
+    'Profiles:',
+    '- Sales Profile: CRUD Lead/Opportunity, Read Account',
+    '- Manager Profile: Sales + Reports + Dashboards',
+    '- Legal Profile: Read-only base',
+    '',
+    'Permission Sets:',
+    '- PS_Contract_Editor: Edit en Contract__c (asignar a Legal)',
+    '- PS_Amount_Viewer: FLS Read en Amount__c (Managers + Finance)',
+    '',
+    '4. SHARING RULES',
+    '-'.repeat(30),
+    '- Legal Access All: Status__c != Draft -> Legal Team (Read/Write)',
+    '- Finance Read: Status__c = Active -> Finance (Read Only)',
+    '- Team visibility: automatico via Role Hierarchy',
+    '',
+    '5. APEX CON SHARING',
+    '-'.repeat(30),
+    'public with sharing class ContractService {',
+    '    // "with sharing" aplica OWD + Sharing Rules automaticamente',
+    '    public static List<Contract__c> getContracts() {',
+    '        return [SELECT Id, Name, Status__c FROM Contract__c];',
+    '    }',
+    '}'
+  ];
+
+  if (isHC) { lines.push('', 'HIPAA: Activar Shield Encryption en campos PHI. Field Audit Trail 10 anos.'); }
+  if (isFin) { lines.push('', 'PCI-DSS: Encriptacion en datos financieros. IP Restrictions por perfil.'); }
+
+  return lines.join('
+');
 }
 
-/* ══════════════════════════════════════════
-   MOTOR OFFLINE: AGENTFORCE
-   ══════════════════════════════════════════ */
-const AGENT_DATA = {
+/* ── Agentforce data ── */
+var AGENT_DATA = {
   leads: [
-    {name:'María González', score:92, company:'TechCorp SA', status:'Hot', action:'Asignada a Carlos R.'},
+    {name:'Maria Gonzalez', score:92, company:'TechCorp SA', status:'Hot', action:'Asignada a Carlos R.'},
     {name:'Ana Torres', score:88, company:'GlobalMed', status:'Hot', action:'Asignada a Laura M.'},
-    {name:'Sofía Ramírez', score:71, company:'UNC', status:'Warm', action:'En nurturing'},
-    {name:'Juan Pérez', score:67, company:'Innovar.io', status:'Warm', action:'En nurturing'},
-    {name:'Roberto Lima', score:34, company:'Startup AR', status:'Cold', action:'Descartado'},
+    {name:'Sofia Ramirez', score:71, company:'UNC', status:'Warm', action:'En nurturing'},
+    {name:'Juan Perez', score:67, company:'Innovar.io', status:'Warm', action:'En nurturing'},
+    {name:'Roberto Lima', score:34, company:'Startup AR', status:'Cold', action:'Descartado'}
   ],
   opps: [
     {name:'TechCorp Enterprise', amount:48000, stage:'Negotiation', close:'2025-07-30'},
     {name:'GlobalMed Professional', amount:22000, stage:'Proposal', close:'2025-08-15'},
-    {name:'UNC Education Plan', amount:8500, stage:'Prospecting', close:'2025-09-01'},
+    {name:'UNC Education Plan', amount:8500, stage:'Prospecting', close:'2025-09-01'}
   ]
 };
 
@@ -1591,281 +1772,74 @@ function responderAgente(pregunta) {
   var totalOpp = AGENT_DATA.opps.reduce(function(s,o){return s+o.amount;},0);
 
   if (/cu.ntos|cuantos|total.*lead|lead.*total/.test(q)) {
-    var hotNames = hot.map(function(l){return l.name;}).join(', ');
     return 'Tengo <strong>' + AGENT_DATA.leads.length + ' leads</strong> registrados hoy:<br>' +
-      '&#128293; Hot: ' + hot.length + ' (' + hotNames + ')<br>' +
-      '&#128257; Warm: ' + warm.length + ' leads en nurturing<br>' +
-      '&#10052; Cold: 1 descartado<br><br>' +
+      'HOT: ' + hot.length + ' (' + hot.map(function(l){return l.name;}).join(', ') + ')<br>' +
+      'WARM: ' + warm.length + ' leads en nurturing<br>COLD: 1 descartado<br><br>' +
       'Score promedio: <strong>' + Math.round(AGENT_DATA.leads.reduce(function(s,l){return s+l.score;},0)/AGENT_DATA.leads.length) + '/100</strong>';
   }
   if (/oportunidad|pipeline|venta|deal/.test(q)) {
     var oppLines = AGENT_DATA.opps.map(function(o){
-      return '&#8226; ' + o.name + ': $' + o.amount.toLocaleString() + ' | ' + o.stage + ' | Cierre: ' + o.close;
+      return '- ' + o.name + ': $' + o.amount.toLocaleString() + ' | ' + o.stage + ' | Cierre: ' + o.close;
     }).join('<br>');
-    return 'Pipeline actual - <strong>' + AGENT_DATA.opps.length + ' oportunidades abiertas</strong>:<br><br>' +
-      oppLines + '<br><br>' +
-      '&#128176; Valor total del pipeline: <strong>$' + totalOpp.toLocaleString() + '</strong>';
+    return 'Pipeline: <strong>' + AGENT_DATA.opps.length + ' oportunidades abiertas</strong><br><br>' +
+      oppLines + '<br><br>Valor total: <strong>$' + totalOpp.toLocaleString() + '</strong>';
   }
   if (/seguimiento|urgente|llamar|priorid/.test(q)) {
-    return 'Leads que requieren accion inmediata:<br><br>' +
-      '&#128293; <strong>' + (hot[0]?hot[0].name:'Lead A') + '</strong> (Score ' + (hot[0]?hot[0].score:92) + ') - ' + (hot[0]?hot[0].action:'') + '<br>' +
-      '&#8594; Llamada de seguimiento pendiente hoy<br><br>' +
-      '&#128293; <strong>' + (hot[1]?hot[1].name:'Lead B') + '</strong> (Score ' + (hot[1]?hot[1].score:88) + ') - ' + (hot[1]?hot[1].action:'') + '<br>' +
-      '&#8594; Propuesta tecnica solicitada<br><br>' +
-      '&#128257; <strong>Sofia Ramirez</strong> (Score 71) - No abrio el ultimo email<br>' +
-      '&#8594; Cambiar asunto y reenviar manana';
+    return 'Leads prioritarios:<br><br>' +
+      'HOT <strong>' + (hot[0]?hot[0].name:'Lead A') + '</strong> (Score ' + (hot[0]?hot[0].score:92) + ') - Llamada hoy<br>' +
+      'HOT <strong>' + (hot[1]?hot[1].name:'Lead B') + '</strong> (Score ' + (hot[1]?hot[1].score:88) + ') - Propuesta pendiente<br>' +
+      'WARM <strong>Sofia Ramirez</strong> (Score 71) - Reenviar email manana';
   }
   if (/resumen|resume|summary/.test(q)) {
-    return '<strong>Resumen ejecutivo de hoy:</strong><br><br>' +
-      '&#8226; Flows ejecutados: 247 (&#8593;12%)<br>' +
-      '&#8226; Leads procesados: ' + AGENT_DATA.leads.length + ' (' + hot.length + ' hot)<br>' +
-      '&#8226; Pipeline total: $' + totalOpp.toLocaleString() + '<br>' +
-      '&#8226; Oportunidades en Negotiation: 1<br>' +
-      '&#8226; Tasa de exito de flows: 98.4%<br><br>' +
-      '&#9989; Sin errores criticos. 3 leads pendientes de asignacion manual.';
+    return '<strong>Resumen ejecutivo:</strong><br>- Flows: 247 ejecuciones (+12%)<br>- Leads: ' + AGENT_DATA.leads.length + ' (' + hot.length + ' hot)<br>- Pipeline: $' + totalOpp.toLocaleString() + '<br>- Exito flows: 98.4%<br><br>[OK] Sin errores criticos hoy.';
   }
   if (/hola|buenos|hi|hello/.test(q)) {
-    return '&#128075; Hola! Soy el agente Einstein de Leandro. Puedo ayudarte con:<br>' +
-      '&#8226; Consultas sobre leads y oportunidades<br>' +
-      '&#8226; Estado del pipeline de ventas<br>' +
-      '&#8226; Resumenes ejecutivos<br>' +
-      '&#8226; Priorizacion de seguimientos<br><br>' +
-      'Que necesitas saber?';
+    return 'Hola! Soy el agente Einstein. Puedo ayudarte con:<br>- Consultas sobre leads<br>- Estado del pipeline<br>- Resumenes ejecutivos<br>- Priorizacion de seguimientos';
   }
-  return 'Consulte los datos de Salesforce para "' + pregunta + '".<br><br>' +
-    'Encontre ' + AGENT_DATA.leads.length + ' leads activos con pipeline de $' + totalOpp.toLocaleString() + '. ' +
-    'Proba con: "Cuantos leads hot tenemos?", "Resume el pipeline" o "Que leads necesitan seguimiento urgente?"';
+  return 'Consulte los datos de Salesforce para "' + pregunta + '".<br>' +
+    'Encontre ' + AGENT_DATA.leads.length + ' leads activos con pipeline de $' + totalOpp.toLocaleString() + '.<br>' +
+    'Proba: "Cuantos leads hot tenemos?" o "Resume el pipeline".';
 }
 
-async function runAgent() {
-  const input = document.getElementById('agent-input');
-  const chat = document.getElementById('agent-chat');
-  const q = input.value.trim();
-  if (!q) return;
-  input.value = '';
-
-  // User bubble
-  chat.innerHTML += `<div style="align-self:flex-end;background:rgba(1,118,211,.15);border:.5px solid rgba(1,118,211,.3);border-radius:8px 8px 2px 8px;padding:7px 11px;font-size:12px;color:var(--text);max-width:85%;">${q}</div>`;
-
-  // Thinking
-  const thinkId = 'think-' + Date.now();
-  chat.innerHTML += `<div id="${thinkId}" style="align-self:flex-start;background:var(--surface2);border-radius:8px;padding:7px 11px;font-size:12px;color:var(--text-muted);display:flex;gap:6px;align-items:center;"><span>Einstein pensando</span><span style="display:flex;gap:3px;"><span class="d"></span><span class="d"></span><span class="d"></span></span></div>`;
-  chat.scrollTop = chat.scrollHeight;
-
-  await fakeDelay(900 + Math.random()*400);
-  document.getElementById(thinkId)?.remove();
-
-  const resp = responderAgente(q);
-  const formatted = resp.replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>').replace(/
-/g,'<br>');
-  chat.innerHTML += `<div style="align-self:flex-start;background:rgba(240,200,66,.07);border:.5px solid rgba(240,200,66,.2);border-radius:8px 8px 8px 2px;padding:8px 11px;font-size:12px;color:var(--text);max-width:90%;line-height:1.6;">${formatted}</div>`;
-  chat.scrollTop = chat.scrollHeight;
+/* ── Runners ── */
+async function runFlowBuilder() {
+  var desc = document.getElementById('fb-input').value.trim();
+  if (!desc) { document.getElementById('fb-input').focus(); return; }
+  var thinking = document.getElementById('fb-thinking');
+  var result = document.getElementById('fb-result');
+  var text = document.getElementById('fb-text');
+  thinking.classList.add('on'); result.classList.remove('on'); text.textContent = '';
+  await fakeDelay(1400 + Math.random()*500);
+  thinking.classList.remove('on');
+  text.textContent = generarFlow(desc);
+  result.classList.add('on');
 }
 
-function setAgentQ(q) {
-  document.getElementById('agent-input').value = q;
-  runAgent();
+async function runScoring() {
+  var nombre = document.getElementById('sc-name').value.trim();
+  var empresa = document.getElementById('sc-company').value.trim();
+  var industria = document.getElementById('sc-industry').value.trim();
+  var comportamiento = document.getElementById('sc-behavior').value.trim();
+  if (!nombre && !empresa) { document.getElementById('sc-name').focus(); return; }
+  var thinking = document.getElementById('sc-thinking');
+  var result = document.getElementById('sc-result');
+  var text = document.getElementById('sc-text');
+  thinking.classList.add('on'); result.classList.remove('on'); text.textContent = '';
+  await fakeDelay(1200 + Math.random()*400);
+  thinking.classList.remove('on');
+  text.textContent = calcularScore(nombre, empresa, industria, comportamiento);
+  result.classList.add('on');
 }
 
-/* ══════════════════════════════════════════
-   MOTOR OFFLINE: APEX DEBUGGER
-   ══════════════════════════════════════════ */
-function analizarApex(code) {
-  const issues = [];
-  const lines = code.split('
-');
-
-  // SOQL en loop
-  if (/for\s*\(.*\)\s*\{[^}]*\[SELECT/s.test(code) || lines.some((l,i)=> /\[SELECT/.test(l) && lines.slice(Math.max(0,i-5),i).some(p=>/for\s*\(/.test(p)))) {
-    issues.push({sev:'CRÍTICO [CRITICO]', title:'SOQL dentro de loop', desc:'Query ejecutada por cada iteración → governor limit: 100 SOQL/transacción. Con 101 registros → System.LimitException.', fix:'Mover el SOQL fuera del loop. Usar Map para lookup por Id o Set de IDs.'});
-  }
-  // DML en loop
-  if (/for\s*\(/.test(code) && /(insert|update|delete|upsert)\s+\w/.test(code)) {
-    issues.push({sev:'CRÍTICO [CRITICO]', title:'DML dentro de loop', desc:'Cada DML consume 1 operación → límite: 150 DML/transacción. Riesgo inmediato con volúmenes reales.', fix:'Acumular registros en List<SObject> dentro del loop, ejecutar DML único después del loop.'});
-  }
-  // Sin try/catch
-  if (!/(try\s*\{|catch\s*\()/.test(code) && /\[SELECT|callout|http\.send/.test(code.toLowerCase())) {
-    issues.push({sev:'ADVERTENCIA [WARN]', title:'Sin manejo de excepciones', desc:'Queries y callouts pueden fallar. Sin try/catch, el error se propaga al usuario sin contexto útil.', fix:'Envolver en try { } catch (QueryException | CalloutException e) { } con logging adecuado.'});
-  }
-  // Sin bulkification
-  if (/Trigger\.new\[0\]|Trigger\.new\.get\(0\)/.test(code)) {
-    issues.push({sev:'CRÍTICO [CRITICO]', title:'Trigger no bulkificado', desc:'Acceso solo al primer registro (index 0). Falla con cargas masivas via Data Loader o integraciones.', fix:'Iterar sobre Trigger.new completo con for(SObject s : Trigger.new) { ... }'});
-  }
-  // Sin sharing
-  if (/public class/.test(code) && !/with sharing|without sharing|inherited sharing/.test(code)) {
-    issues.push({sev:'ADVERTENCIA [WARN]', title:'Sin declaración de sharing', desc:'Clase sin "with sharing" omite las reglas de compartición → posible exposición de datos entre usuarios.', fix:'Usar "public with sharing class X" para respetar OWD y Sharing Rules. "without sharing" solo cuando sea intencional.'});
-  }
-  // Hardcoded IDs
-  if (/['"][a-zA-Z0-9]{15,18}['"]/.test(code)) {
-    issues.push({sev:'ADVERTENCIA [WARN]', title:'ID hardcodeado detectado', desc:'IDs estáticos en código rompen entre sandboxes, staging y producción.', fix:'Usar Custom Metadata, Custom Labels o Custom Settings para valores configurables por entorno.'});
-  }
-
-  if (issues.length === 0) {
-    return `[OK] CÓDIGO LIMPIO — Sin problemas críticos detectados
-
-Buenas prácticas verificadas:
-• Sin SOQL/DML en loops
-• Manejo de excepciones presente
-• Bulkification implementada
-• Sharing configurado
-
-[TIP] Sugerencias adicionales:
-• Agregar @TestVisible en métodos privados para facilitar testing
-• Cubrir edge cases: listas vacías, null checks
-• Documentar con @param y @return en métodos públicos`;
-  }
-
-  let result = `[ANALISIS] ANÁLISIS DE CÓDIGO APEX
-${'─'.repeat(40)}
-
-Problemas encontrados: ${issues.length}
-
-`;
-  issues.forEach((issue, i) => {
-    result += `${i+1}. [${issue.sev}] ${issue.title}
-   Problema: ${issue.desc}
-   [OK] Fix: ${issue.fix}
-
-`;
-  });
-
-  const critical = issues.filter(i=>i.sev.includes('CRÍTICO')).length;
-  result += `${'─'.repeat(40)}
-Resumen: ${critical} crítico(s), ${issues.length - critical} advertencia(s)
-`;
-  result += critical > 0 ? '[ATENCION] Resolver críticos ANTES de deploy a producción.' : '[TIP] Sin críticos. Resolver advertencias antes del code review.';
-  return result;
-}
-
-/* ══════════════════════════════════════════
-   MOTOR OFFLINE: SECURITY MODEL
-   ══════════════════════════════════════════ */
-function generarSecurity(scenario, industry, size) {
-  const isHealthcare = /health|salud|médic|clinic|hospital/.test((industry||'').toLowerCase());
-  const isFinance = /financ|banco|fintech|seguro|invers/.test((industry||'').toLowerCase());
-  const isEnterprise = size && size.includes('5000');
-  const isMid = size && (size.includes('500-5') || size.includes('50-500'));
-
-  const sharingModel = isEnterprise ? 'Private (Enterprise — máximo control, sharing explícito)' :
-                       isMid ? 'Private con Sharing Rules por Rol' : 'Public Read Only';
-
-  const compliance = isHealthcare ? '
-[HEALTH] HIPAA Compliance:
-• Activar Shield Platform Encryption en campos PHI
-• Field Audit Trail habilitado (retención 10 años)
-• Event Monitoring para acceso a datos sensibles' :
-                     isFinance ? '
-[PCI] PCI-DSS / SOX:
-• Encriptación en campos de datos financieros
-• Audit Trail completo
-• IP Restrictions por perfil' : '';
-
-  return `[MODELO] MODELO DE DATOS Y SEGURIDAD RECOMENDADO
-${'═'.repeat(44)}
-
-ESCENARIO: ${scenario ? scenario.slice(0,80) + '...' : 'Sistema de gestión empresarial'}
-INDUSTRIA: ${industry || 'General'} | ESCALA: ${size || '50-500 usuarios'}
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-1. MODELO DE DATOS (Objetos y Relaciones)
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-Objetos principales sugeridos:
-• Contract__c (Master)
-  - Status__c (Picklist: Draft/Active/Expired)
-  - Amount__c (Currency — FLS restringido)
-  - Owner (Lookup: User — base del sharing)
-  - Team__c (Lookup: Team__c)
-
-• Contract_Line__c (Detail de Contract__c)
-  - Quantity__c, Unit_Price__c
-  - Total__c (Formula field)
-
-Relaciones:
-  Contract__c →(Master-Detail)→ Contract_Line__c
-  Contract__c →(Lookup)→ Account
-  Contract__c →(Lookup)→ Opportunity
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-2. ORG-WIDE DEFAULTS (OWD)
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-Contract__c: ${sharingModel}
-Account:     Private
-Opportunity: Private
-Lead:        Private
-
-→ Principio: más restrictivo posible, ampliar con Sharing Rules
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-3. JERARQUÍA DE ROLES
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-CEO / Admin
-├── Sales Director (ve todo su equipo)
-│   ├── Sales Manager — Región Norte
-│   │   ├── Sales Rep 1
-│   │   └── Sales Rep 2
-│   └── Sales Manager — Región Sur
-├── Legal Team (acceso explícito via Permission Set)
-└── Finance (read-only via Sharing Rules)
-
-→ Roles controlan visibilidad vertical (arriba ve abajo)
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-4. PROFILES Y PERMISSION SETS
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-Profiles (acceso base mínimo):
-• Sales Profile: CRUD en Lead/Opportunity, Read en Account
-• Manager Profile: Sales + Reports + Dashboards
-• Legal Profile: Read-only base
-• Finance Profile: Read-only base + Amount__c visible
-
-Permission Sets (acceso adicional granular):
-• PS_Contract_Editor: Edit en Contract__c (asignar a equipo legal)
-• PS_Amount_Viewer: FLS Read en Amount__c (asignar a Finance y Managers)
-• PS_Admin_Reports: Manage Reports (asignar a managers)
-
-Field-Level Security crítico:
-• Amount__c → Oculto para Sales Reps, visible para Managers+
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-5. SHARING RULES
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-Criteria-Based Sharing Rules:
-• "Legal Access All": Contract__c Status__c != 'Draft'
-  → Compartir con Legal Team (Read/Write)
-• "Finance Read Contracts": Contract__c Status__c = 'Active'
-  → Compartir con Finance (Read Only)
-• "Manager Team View": basado en jerarquía de roles
-  → Automático via Role Hierarchy
-${compliance}
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-6. VALIDACIÓN EN APEX (with sharing)
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-public with sharing class ContractService {
-    // "with sharing" aplica OWD + Sharing Rules automáticamente
-    // El usuario solo ve los registros a los que tiene acceso
-    public static List<Contract__c> getContracts() {
-        return [SELECT Id, Name, Status__c FROM Contract__c];
-    }
-}`;
-}
-
-/* ── Runners con delay simulado ── */
 async function runRest() {
-  const ep = document.getElementById('rest-endpoint').value.trim();
-  const method = document.getElementById('rest-method').value;
-  const obj = document.getElementById('rest-object').value.trim();
-  const purpose = document.getElementById('rest-purpose').value.trim();
+  var ep = document.getElementById('rest-endpoint').value.trim();
+  var method = document.getElementById('rest-method').value;
+  var obj = document.getElementById('rest-object').value.trim();
+  var purpose = document.getElementById('rest-purpose').value.trim();
   if (!ep && !obj) { document.getElementById('rest-endpoint').focus(); return; }
-  const thinking = document.getElementById('rest-thinking');
-  const result = document.getElementById('rest-result');
-  const text = document.getElementById('rest-text');
+  var thinking = document.getElementById('rest-thinking');
+  var result = document.getElementById('rest-result');
+  var text = document.getElementById('rest-text');
   thinking.classList.add('on'); result.classList.remove('on'); text.textContent = '';
   await fakeDelay(1300 + Math.random()*500);
   thinking.classList.remove('on');
@@ -1874,13 +1848,13 @@ async function runRest() {
 }
 
 async function runLwc() {
-  const desc = document.getElementById('lwc-desc').value.trim();
-  const obj = document.getElementById('lwc-object').value.trim();
-  const placement = document.getElementById('lwc-placement').value;
+  var desc = document.getElementById('lwc-desc').value.trim();
+  var obj = document.getElementById('lwc-object').value.trim();
+  var placement = document.getElementById('lwc-placement').value;
   if (!desc && !obj) { document.getElementById('lwc-desc').focus(); return; }
-  const thinking = document.getElementById('lwc-thinking');
-  const result = document.getElementById('lwc-result');
-  const text = document.getElementById('lwc-text');
+  var thinking = document.getElementById('lwc-thinking');
+  var result = document.getElementById('lwc-result');
+  var text = document.getElementById('lwc-text');
   thinking.classList.add('on'); result.classList.remove('on'); text.textContent = '';
   await fakeDelay(1500 + Math.random()*600);
   thinking.classList.remove('on');
@@ -1888,12 +1862,34 @@ async function runLwc() {
   result.classList.add('on');
 }
 
+async function runAgent() {
+  var input = document.getElementById('agent-input');
+  var chat = document.getElementById('agent-chat');
+  var q = input.value.trim();
+  if (!q) return;
+  input.value = '';
+  chat.innerHTML += '<div style="align-self:flex-end;background:rgba(1,118,211,.15);border:.5px solid rgba(1,118,211,.3);border-radius:8px 8px 2px 8px;padding:7px 11px;font-size:12px;color:var(--text);max-width:85%;">' + q + '</div>';
+  var thinkId = 'think-' + Date.now();
+  chat.innerHTML += '<div id="' + thinkId + '" style="align-self:flex-start;background:var(--surface2);border-radius:8px;padding:7px 11px;font-size:12px;color:var(--text-muted);">Einstein pensando...</div>';
+  chat.scrollTop = chat.scrollHeight;
+  await fakeDelay(900 + Math.random()*400);
+  var thinkEl = document.getElementById(thinkId); if(thinkEl) thinkEl.remove();
+  var resp = responderAgente(q);
+  chat.innerHTML += '<div style="align-self:flex-start;background:rgba(240,200,66,.07);border:.5px solid rgba(240,200,66,.2);border-radius:8px 8px 8px 2px;padding:8px 11px;font-size:12px;color:var(--text);max-width:90%;line-height:1.6;">' + resp + '</div>';
+  chat.scrollTop = chat.scrollHeight;
+}
+
+function setAgentQ(q) {
+  document.getElementById('agent-input').value = q;
+  runAgent();
+}
+
 async function runDebugger() {
-  const code = document.getElementById('debug-code').value.trim();
+  var code = document.getElementById('debug-code').value.trim();
   if (!code) { document.getElementById('debug-code').focus(); return; }
-  const thinking = document.getElementById('debug-thinking');
-  const result = document.getElementById('debug-result');
-  const text = document.getElementById('debug-text');
+  var thinking = document.getElementById('debug-thinking');
+  var result = document.getElementById('debug-result');
+  var text = document.getElementById('debug-text');
   thinking.classList.add('on'); result.classList.remove('on'); text.textContent = '';
   await fakeDelay(1000 + Math.random()*400);
   thinking.classList.remove('on');
@@ -1902,13 +1898,13 @@ async function runDebugger() {
 }
 
 async function runSecurity() {
-  const scenario = document.getElementById('sec-scenario').value.trim();
-  const industry = document.getElementById('sec-industry').value.trim();
-  const size = document.getElementById('sec-size').value;
+  var scenario = document.getElementById('sec-scenario').value.trim();
+  var industry = document.getElementById('sec-industry').value.trim();
+  var size = document.getElementById('sec-size').value;
   if (!scenario) { document.getElementById('sec-scenario').focus(); return; }
-  const thinking = document.getElementById('sec-thinking');
-  const result = document.getElementById('sec-result');
-  const text = document.getElementById('sec-text');
+  var thinking = document.getElementById('sec-thinking');
+  var result = document.getElementById('sec-result');
+  var text = document.getElementById('sec-text');
   thinking.classList.add('on'); result.classList.remove('on'); text.textContent = '';
   await fakeDelay(1400 + Math.random()*500);
   thinking.classList.remove('on');
@@ -1916,7 +1912,13 @@ async function runSecurity() {
   result.classList.add('on');
 }
 
-/* ── Ejemplos de carga ── */
+/* ── Fill examples ── */
+function fillScoreExample() {
+  document.getElementById('sc-name').value = 'Diego Martinez, CTO';
+  document.getElementById('sc-company').value = 'Fintech SA, 200 empleados';
+  document.getElementById('sc-industry').value = 'Tecnologia financiera B2B SaaS';
+  document.getElementById('sc-behavior').value = 'Abrio 3 emails, visito pricing 2 veces, descargo whitepaper tecnico';
+}
 function fillRestExample() {
   document.getElementById('rest-endpoint').value = 'https://api.stripe.com/v1/charges';
   document.getElementById('rest-method').value = 'POST';
@@ -1924,106 +1926,73 @@ function fillRestExample() {
   document.getElementById('rest-purpose').value = 'Crear cargo de pago al cerrar oportunidad como Closed Won';
 }
 function fillLwcExample() {
-  document.getElementById('lwc-desc').value = 'Tabla de oportunidades abiertas con filtro por Stage y botón para marcar como Ganada sin salir de la página. Mostrar nombre, monto y fecha de cierre.';
+  document.getElementById('lwc-desc').value = 'Tabla de oportunidades abiertas con filtro por Stage y boton para marcar como Ganada sin salir de la pagina';
   document.getElementById('lwc-object').value = 'Opportunity';
   document.getElementById('lwc-placement').value = 'Record Page';
 }
 function fillDebugExample() {
-  document.getElementById('debug-code').value = `trigger LeadTrigger on Lead (before insert, before update) {
+  document.getElementById('debug-code').value = 'trigger LeadTrigger on Lead (before insert) {
   for(Lead l : Trigger.new) {
-    // SOQL dentro del loop - problema grave
     List<Contact> dups = [SELECT Id FROM Contact WHERE Email = :l.Email];
-    if(dups.size() > 0) {
-      l.addError('Ya existe un contacto con ese email');
-    }
-    // DML dentro del loop - otro problema
-    Task t = new Task(Subject='Seguimiento', WhoId=l.Id);
+    if(dups.size() > 0) { l.addError('Duplicado'); }
+    Task t = new Task(Subject='Seguimiento');
     insert t;
   }
-}`;
+}';
 }
 function fillSecExample() {
-  document.getElementById('sec-scenario').value = 'Sistema de gestión de contratos donde los vendedores solo ven sus propios contratos, los managers ven los de su equipo, y el equipo legal ve todos. Los montos son confidenciales para ventas.';
-  document.getElementById('sec-industry').value = 'Tecnología B2B SaaS';
+  document.getElementById('sec-scenario').value = 'Vendedores solo ven sus contratos, managers ven los de su equipo, legal ve todos. Montos confidenciales para ventas.';
+  document.getElementById('sec-industry').value = 'Tecnologia B2B SaaS';
   document.getElementById('sec-size').value = '50-500 usuarios';
 }
 
-// Init Agentforce chat con mensaje de bienvenida
-(function initAgent() {
-  const chat = document.getElementById('agent-chat');
-  if (!chat) return;
-  chat.innerHTML = `<div style="align-self:flex-start;background:rgba(240,200,66,.07);border:.5px solid rgba(240,200,66,.2);border-radius:8px 8px 8px 2px;padding:8px 11px;font-size:12px;color:var(--text);max-width:90%;line-height:1.6;">¡Hola! Soy el agente Einstein. Preguntame sobre leads, oportunidades o el pipeline de ventas.</div>`;
-})();
-
-/* ══════════════════════════════════════════
+/* ══════════════════════════════════════
    EVENT WIRING — DOMContentLoaded
-   All interactions wired here, zero onclick
-   ══════════════════════════════════════════ */
+   ══════════════════════════════════════ */
 document.addEventListener('DOMContentLoaded', function() {
 
-  /* ── Sidebar navigation ── */
   document.querySelectorAll('.sb-item[data-page]').forEach(function(btn) {
-    btn.addEventListener('click', function() {
-      goPage(btn, btn.getAttribute('data-page'));
-    });
+    btn.addEventListener('click', function() { goPage(btn, btn.getAttribute('data-page')); });
   });
 
-  /* ── Flow rows ── */
   document.querySelectorAll('.flow-row[data-flow]').forEach(function(row) {
-    row.addEventListener('click', function() {
-      pickFlow(row, parseInt(row.getAttribute('data-flow')));
-    });
+    row.addEventListener('click', function() { pickFlow(row, parseInt(row.getAttribute('data-flow'), 10)); });
   });
 
-  /* ── AI tool buttons ── */
-  var bindings = [
-    ['btn-fb',        function(){ runFlowBuilder(); }],
-    ['btn-fill-fb',   function(){
+  var btnMap = {
+    'btn-fb': runFlowBuilder, 'btn-fill-fb': function() {
       var el = document.getElementById('fb-input');
-      if(el) el.value = 'Cuando un lead se crea con Lead Source = Web y pais = Argentina, esperar 10 minutos, enviar email de bienvenida personalizado y si no abre el email en 48hs crear una tarea para el SDR encargado';
-    }],
-    ['btn-score',     function(){ runScoring(); }],
-    ['btn-fill-score',function(){ fillScoreExample(); }],
-    ['btn-rest',      function(){ runRest(); }],
-    ['btn-fill-rest', function(){ fillRestExample(); }],
-    ['btn-lwc',       function(){ runLwc(); }],
-    ['btn-fill-lwc',  function(){ fillLwcExample(); }],
-    ['btn-agent',     function(){ runAgent(); }],
-    ['btn-debug',     function(){ runDebugger(); }],
-    ['btn-fill-debug',function(){ fillDebugExample(); }],
-    ['btn-sec',       function(){ runSecurity(); }],
-    ['btn-fill-sec',  function(){ fillSecExample(); }],
-  ];
-  bindings.forEach(function(pair) {
-    var el = document.getElementById(pair[0]);
-    if (el) el.addEventListener('click', pair[1]);
+      if (el) el.value = 'Cuando un lead se crea con Lead Source Web y pais Argentina, esperar 10 minutos, enviar email de bienvenida y si no lo abre en 48hs crear tarea para el SDR';
+    },
+    'btn-score': runScoring, 'btn-fill-score': fillScoreExample,
+    'btn-rest': runRest, 'btn-fill-rest': fillRestExample,
+    'btn-lwc': runLwc, 'btn-fill-lwc': fillLwcExample,
+    'btn-agent': runAgent,
+    'btn-debug': runDebugger, 'btn-fill-debug': fillDebugExample,
+    'btn-sec': runSecurity, 'btn-fill-sec': fillSecExample
+  };
+  Object.keys(btnMap).forEach(function(id) {
+    var el = document.getElementById(id);
+    if (el) el.addEventListener('click', btnMap[id]);
   });
 
-  /* ── Agent input Enter key ── */
   var agentInput = document.getElementById('agent-input');
-  if (agentInput) {
-    agentInput.addEventListener('keydown', function(e) {
-      if (e.key === 'Enter') runAgent();
-    });
-  }
+  if (agentInput) agentInput.addEventListener('keydown', function(e) { if (e.key === 'Enter') runAgent(); });
 
-  /* ── Agent quick question buttons ── */
   document.querySelectorAll('[data-q]').forEach(function(btn) {
-    btn.addEventListener('click', function() {
-      setAgentQ(btn.getAttribute('data-q'));
-    });
+    btn.addEventListener('click', function() { setAgentQ(btn.getAttribute('data-q')); });
   });
 
-  /* ── Init: render first flow ── */
   renderFlow(0);
 
-  /* ── Init: Agentforce welcome message ── */
   var chat = document.getElementById('agent-chat');
   if (chat && chat.children.length === 0) {
-    chat.innerHTML = '<div style="align-self:flex-start;background:rgba(240,200,66,.07);border:.5px solid rgba(240,200,66,.2);border-radius:8px 8px 8px 2px;padding:8px 11px;font-size:12px;color:var(--text);max-width:90%;line-height:1.6;">Hola! Soy el agente Einstein de Leandro. Preguntame sobre leads, oportunidades o el pipeline de ventas.</div>';
+    chat.innerHTML = '<div style="align-self:flex-start;background:rgba(240,200,66,.07);border:.5px solid rgba(240,200,66,.2);border-radius:8px 8px 8px 2px;padding:8px 11px;font-size:12px;color:var(--text);max-width:90%;line-height:1.6;">Hola! Soy el agente Einstein. Preguntame sobre leads, oportunidades o el pipeline.</div>';
   }
-});
 
+  var firstBtn = document.querySelector('.sb-item[data-page="flows"]');
+  if (firstBtn) firstBtn.classList.add('active');
+});
 </script>
 </body>
 </html>
