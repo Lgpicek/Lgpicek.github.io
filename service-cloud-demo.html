@@ -1,0 +1,951 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Service Cloud Demo - Leandro Picek</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css"/>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg: #0D0F14; --surface: #151820; --surface2: #1C2030;
+  --teal: #1D9E75; --teal-bright: #5DCAA5;
+  --text: #E8EAF0; --text-muted: #7A8099; --text-dim: #4A5068;
+  --border: rgba(255,255,255,0.07); --border-teal: rgba(29,158,117,0.3);
+  --radius: 10px; --font: "Segoe UI", system-ui, sans-serif;
+  --font-mono: "Fira Code", "Consolas", monospace;
+  --blue: #1589EE; --blue-dim: rgba(21,137,238,0.12);
+  --green: #2E844A; --green-dim: rgba(46,132,74,0.12);
+  --red-dim: rgba(186,5,23,0.12);
+  --orange: #DD5A0E; --orange-dim: rgba(221,90,14,0.12);
+}
+html { scroll-behavior: smooth; }
+body { background: var(--bg); color: var(--text); font-family: var(--font); font-size: 14px; line-height: 1.6; }
+.topbar { position: sticky; top: 0; z-index: 100; background: rgba(13,15,20,0.92); backdrop-filter: blur(12px); border-bottom: 0.5px solid var(--border); padding: 0 1.5rem; height: 52px; display: flex; align-items: center; justify-content: space-between; }
+.topbar-left { display: flex; align-items: center; gap: 10px; }
+.back-link { display: inline-flex; align-items: center; gap: 5px; color: var(--text-muted); text-decoration: none; font-size: 13px; transition: color 0.2s; }
+.back-link:hover { color: var(--teal-bright); }
+.sep { width: 1px; height: 18px; background: var(--border); }
+.top-title { font-size: 13px; font-weight: 500; display: flex; align-items: center; gap: 7px; }
+.live-badge { font-size: 10px; padding: 2px 8px; border-radius: 99px; background: var(--green-dim); color: #5DCAA5; border: 0.5px solid rgba(46,132,74,0.3); font-family: var(--font-mono); display: flex; align-items: center; gap: 4px; }
+.ldot { width: 6px; height: 6px; border-radius: 50%; background: #5DCAA5; animation: pulse 2s infinite; }
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.3}}
+.top-author { font-size: 12px; color: var(--text-muted); }
+.top-author a { color: var(--teal-bright); text-decoration: none; }
+.hero { background: linear-gradient(135deg, #08111e 0%, var(--bg) 65%); border-bottom: 0.5px solid var(--border); padding: 1.75rem 1.5rem 1.5rem; display: flex; gap: 2rem; flex-wrap: wrap; }
+.hero-info { flex: 1; min-width: 260px; }
+.eyebrow { font-family: var(--font-mono); font-size: 11px; color: var(--green); letter-spacing: 0.1em; margin-bottom: 7px; display: flex; align-items: center; gap: 6px; }
+.eyebrow::before { content:""; width: 14px; height: 1px; background: var(--green); }
+.hero h1 { font-size: 1.45rem; font-weight: 700; letter-spacing: -0.02em; margin-bottom: 5px; }
+.hero p { font-size: 13px; color: var(--text-muted); max-width: 480px; line-height: 1.7; }
+.htags { display: flex; gap: 5px; flex-wrap: wrap; margin-top: 10px; }
+.htag { font-size: 11px; font-family: var(--font-mono); padding: 2px 8px; border-radius: 4px; background: var(--green-dim); color: #5DCAA5; border: 0.5px solid rgba(46,132,74,0.25); }
+.hero-stats { display: flex; gap: 1.5rem; flex-wrap: wrap; }
+.hs-num { font-size: 1.35rem; font-weight: 700; font-family: var(--font-mono); color: #5DCAA5; line-height: 1; }
+.hs-label { font-size: 11px; color: var(--text-muted); margin-top: 3px; }
+.layout { display: flex; min-height: calc(100vh - 52px - 120px); }
+.sidebar { width: 210px; flex-shrink: 0; background: var(--bg); border-right: 0.5px solid var(--border); padding: 10px 0; }
+.sb-sec { padding: 8px 14px 2px; font-size: 10px; font-weight: 500; color: var(--text-dim); letter-spacing: 0.08em; text-transform: uppercase; margin-top: 6px; }
+.sb-btn { display: flex; align-items: center; gap: 9px; padding: 7px 14px; font-size: 13px; color: var(--text-muted); cursor: pointer; transition: all 0.15s; border-left: 2px solid transparent; background: none; border-top: none; border-right: none; border-bottom: none; width: 100%; text-align: left; }
+.sb-btn:hover { background: var(--surface); color: var(--text); }
+.sb-btn.active { background: var(--green-dim); color: #5DCAA5; border-left-color: var(--green); }
+.sb-btn i { font-size: 15px; flex-shrink: 0; }
+.sb-cnt { margin-left: auto; font-size: 10px; padding: 1px 6px; border-radius: 99px; background: var(--red-dim); color: #F08090; }
+.main { flex: 1; padding: 16px; background: var(--bg); overflow-y: auto; }
+.sf-page { display: none; }
+.sf-page.active { display: block; }
+.sec-title { font-size: 12px; font-weight: 500; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 14px; display: flex; align-items: center; gap: 7px; }
+.stats-row { display: grid; grid-template-columns: repeat(4,1fr); gap: 10px; margin-bottom: 16px; }
+.stat-card { background: var(--surface); border: 0.5px solid var(--border); border-radius: var(--radius); padding: 12px 14px; }
+.slabel { font-size: 11px; color: var(--text-muted); margin-bottom: 5px; }
+.svalue { font-size: 22px; font-weight: 700; font-family: var(--font-mono); line-height: 1; }
+.sdelta { font-size: 11px; margin-top: 5px; }
+.up { color: #5DCAA5; } .dn { color: #F0935A; } .wn { color: #EF9F27; }
+.case-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px; }
+.case-row { background: var(--surface); border: 0.5px solid var(--border); border-radius: var(--radius); padding: 12px 14px; display: flex; align-items: flex-start; gap: 12px; cursor: pointer; transition: all 0.15s; }
+.case-row:hover { border-color: rgba(255,255,255,0.14); transform: translateY(-1px); }
+.case-row.selected { border-color: var(--teal); background: rgba(29,158,117,0.05); }
+.cpr { width: 4px; border-radius: 2px; align-self: stretch; flex-shrink: 0; }
+.cpr-c { background: #E24B4A; } .cpr-h { background: #EF9F27; } .cpr-m { background: #60AFEE; } .cpr-l { background: var(--text-dim); }
+.cinfo { flex: 1; min-width: 0; }
+.cheader { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; flex-wrap: wrap; }
+.cnum { font-family: var(--font-mono); font-size: 11px; color: var(--text-dim); }
+.ctitle { font-size: 13px; font-weight: 500; color: var(--text); }
+.cpreview { font-size: 12px; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 400px; }
+.cmeta { display: flex; align-items: center; gap: 10px; margin-top: 6px; flex-wrap: wrap; }
+.ctime { font-size: 11px; color: var(--text-dim); margin-left: auto; flex-shrink: 0; }
+.pill { display: inline-flex; align-items: center; gap: 3px; padding: 2px 8px; border-radius: 99px; font-size: 10px; font-weight: 500; }
+.p-crit{background:rgba(226,75,74,.15);color:#F08080;} .p-high{background:rgba(239,159,39,.15);color:#EF9F27;}
+.p-med{background:rgba(96,175,238,.15);color:#60AFEE;} .p-low{background:rgba(255,255,255,.05);color:var(--text-muted);}
+.p-open{background:rgba(96,175,238,.12);color:#60AFEE;} .p-pend{background:rgba(239,159,39,.12);color:#EF9F27;}
+.p-res{background:rgba(93,202,165,.12);color:#5DCAA5;} .p-esc{background:rgba(226,75,74,.12);color:#F08080;}
+.btn { display: inline-flex; align-items: center; gap: 5px; padding: 6px 13px; border-radius: 7px; font-size: 12px; font-weight: 500; cursor: pointer; transition: all 0.2s; border: 0.5px solid transparent; }
+.btn-g { background: var(--teal); color: white; border-color: var(--teal); }
+.btn-g:hover { background: var(--teal-bright); color: #0D0F14; }
+.btn-o { background: transparent; color: var(--text-muted); border-color: var(--border); }
+.btn-o:hover { border-color: rgba(255,255,255,0.2); color: var(--text); }
+.btn-r { background: var(--red-dim); color: #F08080; border-color: rgba(186,5,23,0.25); }
+.btn-sm { padding: 4px 10px; font-size: 11px; }
+.case-detail { background: var(--surface); border: 0.5px solid var(--border); border-radius: var(--radius); padding: 16px; margin-bottom: 16px; }
+.det-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem; margin-bottom: 14px; flex-wrap: wrap; }
+.det-title { font-size: 15px; font-weight: 600; color: var(--text); }
+.det-meta { font-size: 12px; color: var(--text-muted); margin-top: 3px; }
+.det-actions { display: flex; gap: 6px; flex-wrap: wrap; }
+.det-body { font-size: 13px; color: var(--text-muted); line-height: 1.7; padding: 12px; background: var(--bg); border-radius: 7px; border: 0.5px solid var(--border); margin-bottom: 12px; font-style: italic; }
+.det-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.flabel { font-size: 10px; color: var(--text-dim); letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 3px; }
+.fvalue { font-size: 13px; color: var(--text); }
+.ai-panel { background: var(--surface); border: 0.5px solid var(--border-teal); border-radius: var(--radius); padding: 14px; margin-bottom: 14px; }
+.ai-head { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+.ai-ico { width: 30px; height: 30px; border-radius: 7px; background: rgba(29,158,117,0.15); color: var(--teal-bright); display: flex; align-items: center; justify-content: center; font-size: 15px; flex-shrink: 0; }
+.ai-ttl { font-size: 13px; font-weight: 500; color: var(--text); }
+.ai-sub-t { font-size: 11px; color: var(--text-muted); }
+.field-lbl { font-size: 11px; color: var(--text-muted); margin-bottom: 4px; }
+textarea.ata { width: 100%; padding: 9px 11px; background: var(--bg); border: 0.5px solid var(--border); border-radius: 7px; color: var(--text); font-size: 13px; font-family: var(--font); line-height: 1.55; resize: vertical; transition: border-color 0.15s; }
+textarea.ata:focus { outline: none; border-color: var(--teal); }
+.btn-row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
+.thinking { display: none; align-items: center; gap: 8px; font-size: 12px; color: var(--text-muted); margin-top: 10px; }
+.thinking.on { display: flex; }
+.dots { display: flex; gap: 4px; }
+.d { width: 6px; height: 6px; border-radius: 50%; background: var(--teal); animation: bonce 1.2s ease-in-out infinite; }
+.d:nth-child(2){animation-delay:.2s}.d:nth-child(3){animation-delay:.4s}
+@keyframes bonce{0%,60%,100%{transform:translateY(0)}30%{transform:translateY(-5px)}}
+.ai-res { display: none; margin-top: 12px; background: var(--bg); border: 0.5px solid var(--border); border-radius: 7px; padding: 12px 14px; }
+.ai-res.on { display: block; }
+.res-lbl { font-size: 10px; font-family: var(--font-mono); color: var(--teal); letter-spacing: 0.08em; margin-bottom: 8px; display: flex; align-items: center; gap: 5px; }
+.res-lbl::before { content:""; width: 10px; height: 1px; background: var(--teal); }
+.res-txt { font-size: 13px; color: var(--text); line-height: 1.7; white-space: pre-wrap; }
+.code-panel { background: var(--surface); border: 0.5px solid var(--border); border-radius: var(--radius); overflow: hidden; margin-bottom: 14px; }
+.code-hdr { display: flex; align-items: center; justify-content: space-between; padding: 9px 14px; background: var(--surface2); border-bottom: 0.5px solid var(--border); }
+.cdots { display: flex; gap: 5px; }
+.cdot { width: 10px; height: 10px; border-radius: 50%; }
+.dr{background:#FF5F56;}.dy{background:#FFBD2E;}.dg{background:#27C93F;}
+.cfname { font-size: 12px; color: var(--text-muted); font-family: var(--font-mono); }
+.cpbtn { font-size: 11px; padding: 3px 9px; border-radius: 5px; border: 0.5px solid var(--border); background: transparent; color: var(--text-muted); cursor: pointer; font-family: var(--font-mono); display: flex; align-items: center; gap: 4px; transition: all 0.15s; }
+.cpbtn:hover { color: var(--teal-bright); border-color: var(--border-teal); }
+.ctabs { display: flex; background: var(--surface2); border-bottom: 0.5px solid var(--border); }
+.ctab { padding: 6px 14px; font-size: 12px; font-family: var(--font-mono); color: var(--text-muted); cursor: pointer; border-bottom: 2px solid transparent; background: none; border-top: none; border-left: none; border-right: none; transition: all 0.15s; }
+.ctab:hover { color: var(--text); }
+.ctab.active { color: #5DCAA5; border-bottom-color: var(--green); }
+pre.code { margin: 0; padding: 14px; overflow-x: auto; font-family: var(--font-mono); font-size: 12px; line-height: 1.65; color: #ABB2BF; max-height: 400px; overflow-y: auto; }
+.kw{color:#C678DD;}.cm{color:#5C6370;font-style:italic;}.st{color:#98C379;}.tp{color:#E5C07B;}.an{color:#E06C75;}.nu{color:#D19A66;}
+.tbl-wrap { background: var(--surface); border: 0.5px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+table { width: 100%; border-collapse: collapse; font-size: 12px; }
+thead th { text-align: left; padding: 8px 12px; font-size: 10px; font-weight: 500; color: var(--text-dim); letter-spacing: 0.07em; text-transform: uppercase; border-bottom: 0.5px solid var(--border); background: var(--surface2); }
+tbody td { padding: 9px 12px; border-bottom: 0.5px solid var(--border); vertical-align: middle; color: var(--text); }
+tbody tr:last-child td { border-bottom: none; }
+tbody tr:hover td { background: var(--surface2); }
+.sla-bg { flex: 1; height: 5px; background: var(--surface2); border-radius: 99px; overflow: hidden; }
+.sla-bar { height: 100%; border-radius: 99px; }
+.s-ok{background:#5DCAA5;}.s-wn{background:#EF9F27;}.s-cr{background:#E24B4A;}
+footer { border-top: 0.5px solid var(--border); padding: 1.25rem 1.5rem; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; }
+.fl { font-size: 12px; color: var(--text-dim); font-family: var(--font-mono); }
+.flink { display: inline-flex; align-items: center; gap: 5px; font-size: 12px; color: var(--text-muted); text-decoration: none; padding: 5px 12px; border-radius: 6px; border: 0.5px solid var(--border); transition: all 0.15s; }
+.flink:hover { color: var(--teal-bright); border-color: var(--border-teal); }
+@media(max-width:640px){
+  .sidebar{width:46px;}.sb-sec,.sb-btn span,.sb-cnt{display:none;}.sb-btn{justify-content:center;padding:8px;}
+  .stats-row{grid-template-columns:1fr 1fr;}.det-grid{grid-template-columns:1fr;}
+}
+</style>
+</head>
+<body>
+
+<nav class="topbar">
+  <div class="topbar-left">
+    <a href="index.html" class="back-link"><i class="ti ti-arrow-left" aria-hidden="true"></i> Portfolio</a>
+    <div class="sep"></div>
+    <div class="top-title"><i class="ti ti-headset" aria-hidden="true" style="color:#5DCAA5;font-size:16px;"></i> Service Cloud</div>
+    <div class="live-badge"><div class="ldot"></div> IA activa</div>
+  </div>
+  <div class="top-author">por <a href="index.html">Leandro Picek</a></div>
+</nav>
+
+<div class="hero">
+  <div class="hero-info">
+    <div class="eyebrow">demo funcional - service cloud</div>
+    <h1>Soporte Inteligente con Apex + IA</h1>
+    <p>Sistema de gestion de casos real: clasificacion automatica de urgencia, respuestas con IA, deteccion de churn, escalacion Apex y monitor de SLA en tiempo real.</p>
+    <div class="htags">
+      <span class="htag">Apex</span><span class="htag">Service Cloud</span>
+      <span class="htag">Case</span><span class="htag">SLA</span>
+      <span class="htag">Trigger</span><span class="htag">Batch</span><span class="htag">IA</span>
+    </div>
+  </div>
+  <div class="hero-stats">
+    <div><div class="hs-num">12</div><div class="hs-label">casos abiertos</div></div>
+    <div><div class="hs-num" style="color:#F08080;">3</div><div class="hs-label">criticos</div></div>
+    <div><div class="hs-num" style="color:#EF9F27;">87%</div><div class="hs-label">SLA cumplido</div></div>
+    <div><div class="hs-num">4.2h</div><div class="hs-label">tiempo prom.</div></div>
+  </div>
+</div>
+
+<div class="layout">
+  <aside class="sidebar">
+    <div class="sb-sec">Service Cloud</div>
+    <button class="sb-btn active" data-pg="cases"><i class="ti ti-inbox" aria-hidden="true"></i><span>Bandeja de Casos</span><span class="sb-cnt">12</span></button>
+    <button class="sb-btn" data-pg="ai"><i class="ti ti-brain" aria-hidden="true"></i><span>Automatizacion IA</span></button>
+    <button class="sb-btn" data-pg="sla"><i class="ti ti-clock" aria-hidden="true"></i><span>Monitor SLA</span></button>
+    <div class="sb-sec">Codigo Apex</div>
+    <button class="sb-btn" data-pg="apex1"><i class="ti ti-code" aria-hidden="true"></i><span>Clasificacion</span></button>
+    <button class="sb-btn" data-pg="apex2"><i class="ti ti-arrow-up" aria-hidden="true"></i><span>Escalacion</span></button>
+    <button class="sb-btn" data-pg="apex3"><i class="ti ti-stack" aria-hidden="true"></i><span>Batch SLA</span></button>
+    <div class="sb-sec">Analisis</div>
+    <button class="sb-btn" data-pg="metrics"><i class="ti ti-chart-bar" aria-hidden="true"></i><span>Metricas</span></button>
+  </aside>
+
+  <main class="main">
+
+    <!-- BANDEJA -->
+    <div class="sf-page active" id="page-cases">
+      <div class="stats-row">
+        <div class="stat-card"><div class="slabel">Abiertos</div><div class="svalue" style="color:#60AFEE;">12</div><div class="sdelta up">3 nuevos hoy</div></div>
+        <div class="stat-card"><div class="slabel">Criticos</div><div class="svalue" style="color:#E24B4A;">3</div><div class="sdelta dn">Atencion urgente</div></div>
+        <div class="stat-card"><div class="slabel">Resueltos hoy</div><div class="svalue" style="color:#5DCAA5;">8</div><div class="sdelta up">+25% vs ayer</div></div>
+        <div class="stat-card"><div class="slabel">SLA vencidos</div><div class="svalue" style="color:#EF9F27;">2</div><div class="sdelta wn">Escalados auto</div></div>
+      </div>
+      <div class="sec-title"><i class="ti ti-inbox" aria-hidden="true" style="color:#5DCAA5;"></i> Casos activos - click para ver detalle</div>
+      <div class="case-list" id="case-list"></div>
+      <div class="case-detail" id="case-detail" style="display:none;">
+        <div class="det-head">
+          <div><div class="det-title" id="det-title">-</div><div class="det-meta" id="det-meta">-</div></div>
+          <div class="det-actions">
+            <button class="btn btn-o btn-sm" id="btn-res"><i class="ti ti-check" aria-hidden="true"></i> Resolver</button>
+            <button class="btn btn-r btn-sm" id="btn-esc"><i class="ti ti-arrow-up" aria-hidden="true"></i> Escalar</button>
+          </div>
+        </div>
+        <div class="det-body" id="det-body">-</div>
+        <div class="det-grid">
+          <div><div class="flabel">Cliente</div><div class="fvalue" id="det-client">-</div></div>
+          <div><div class="flabel">Asignado a</div><div class="fvalue" id="det-agent">-</div></div>
+          <div><div class="flabel">Categoria</div><div class="fvalue" id="det-cat">-</div></div>
+          <div><div class="flabel">SLA restante</div><div class="fvalue" id="det-sla">-</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- IA TOOLS -->
+    <div class="sf-page" id="page-ai">
+      <div class="sec-title"><i class="ti ti-brain" aria-hidden="true" style="color:#5DCAA5;"></i> Automatizacion IA - simulacion de los servicios Apex</div>
+
+      <div class="ai-panel">
+        <div class="ai-head">
+          <div class="ai-ico"><i class="ti ti-alert-triangle" aria-hidden="true"></i></div>
+          <div><div class="ai-ttl">Clasificador de Urgencia</div><div class="ai-sub-t">Replica CaseClassificationService.cls - analiza el mensaje y asigna prioridad + SLA automaticamente</div></div>
+        </div>
+        <div class="field-lbl">Mensaje del cliente</div>
+        <textarea class="ata" id="cl-input" rows="4" placeholder="Ej: El sistema esta completamente caido desde hace 2 horas. Tenemos 300 empleados sin poder trabajar y perdemos mucho dinero por minuto. Necesitamos solucion YA."></textarea>
+        <div class="btn-row">
+          <button class="btn btn-g" id="btn-classify"><i class="ti ti-brain" aria-hidden="true"></i> Clasificar urgencia</button>
+          <button class="btn btn-o" id="btn-ex-crit"><i class="ti ti-bulb" aria-hidden="true"></i> Ejemplo critico</button>
+          <button class="btn btn-o" id="btn-ex-norm"><i class="ti ti-bulb" aria-hidden="true"></i> Ejemplo normal</button>
+        </div>
+        <div class="thinking" id="cl-think"><div class="dots"><div class="d"></div><div class="d"></div><div class="d"></div></div><span>Analizando urgencia...</span></div>
+        <div class="ai-res" id="cl-res"><div class="res-lbl">Resultado - CaseClassificationService.cls</div><div class="res-txt" id="cl-txt"></div></div>
+      </div>
+
+      <div class="ai-panel">
+        <div class="ai-head">
+          <div class="ai-ico"><i class="ti ti-message-reply" aria-hidden="true"></i></div>
+          <div><div class="ai-ttl">Generador de Respuesta al Cliente</div><div class="ai-sub-t">Replica CaseResponseService.cls - genera respuesta profesional personalizada para el agente</div></div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;">
+          <div><div class="field-lbl">Que reporta el cliente</div><textarea class="ata" id="rp-case" rows="3" placeholder="Descripcion del problema..."></textarea></div>
+          <div><div class="field-lbl">Contexto del cliente</div><textarea class="ata" id="rp-ctx" rows="3" placeholder="Ej: cliente Premium, primer incidente..."></textarea></div>
+        </div>
+        <div class="btn-row">
+          <button class="btn btn-g" id="btn-respond"><i class="ti ti-message-reply" aria-hidden="true"></i> Generar respuesta</button>
+          <button class="btn btn-o" id="btn-ex-resp"><i class="ti ti-bulb" aria-hidden="true"></i> Cargar ejemplo</button>
+        </div>
+        <div class="thinking" id="rp-think"><div class="dots"><div class="d"></div><div class="d"></div><div class="d"></div></div><span>Generando respuesta profesional...</span></div>
+        <div class="ai-res" id="rp-res"><div class="res-lbl">Respuesta sugerida - CaseResponseService.cls</div><div class="res-txt" id="rp-txt"></div></div>
+      </div>
+
+      <div class="ai-panel">
+        <div class="ai-head">
+          <div class="ai-ico"><i class="ti ti-mood-sad" aria-hidden="true"></i></div>
+          <div><div class="ai-ttl">Detector de Sentimiento y Riesgo de Churn</div><div class="ai-sub-t">Replica SentimentAnalysisService.cls - detecta clientes frustrados antes de que cancelen</div></div>
+        </div>
+        <div class="field-lbl">Mensajes del cliente (uno o varios)</div>
+        <textarea class="ata" id="sn-input" rows="4" placeholder="Pega los mensajes del cliente..."></textarea>
+        <div class="btn-row">
+          <button class="btn btn-g" id="btn-sent"><i class="ti ti-mood-sad" aria-hidden="true"></i> Analizar sentimiento</button>
+          <button class="btn btn-o" id="btn-ex-sent"><i class="ti ti-bulb" aria-hidden="true"></i> Cargar ejemplo</button>
+        </div>
+        <div class="thinking" id="sn-think"><div class="dots"><div class="d"></div><div class="d"></div><div class="d"></div></div><span>Analizando sentimiento y riesgo de churn...</span></div>
+        <div class="ai-res" id="sn-res"><div class="res-lbl">Analisis - SentimentAnalysisService.cls</div><div class="res-txt" id="sn-txt"></div></div>
+      </div>
+    </div>
+
+    <!-- SLA MONITOR -->
+    <div class="sf-page" id="page-sla">
+      <div class="sec-title"><i class="ti ti-clock" aria-hidden="true" style="color:#EF9F27;"></i> Monitor de SLA - ordenados por urgencia</div>
+      <div class="tbl-wrap"><table>
+        <thead><tr><th>Caso</th><th>Cliente</th><th>Prioridad</th><th>SLA total</th><th>Uso del SLA</th><th>Estado</th></tr></thead>
+        <tbody id="sla-body"></tbody>
+      </table></div>
+    </div>
+
+    <!-- APEX 1 -->
+    <div class="sf-page" id="page-apex1">
+      <div class="sec-title"><i class="ti ti-code" aria-hidden="true" style="color:#60AFEE;"></i> CaseClassificationService.cls - Apex trigger before insert</div>
+      <p style="font-size:13px;color:var(--text-muted);margin-bottom:14px;line-height:1.7;">Este servicio se ejecuta en <strong style="color:var(--text);">before insert</strong> de cada Case. Analiza las palabras clave del mensaje, calcula un score de urgencia, asigna prioridad y SLA antes de que el registro se guarde.</p>
+      <div class="code-panel">
+        <div class="code-hdr"><div style="display:flex;align-items:center;gap:10px;"><div class="cdots"><div class="cdot dr"></div><div class="cdot dy"></div><div class="cdot dg"></div></div><span class="cfname" id="fn-apex1">CaseTrigger.trigger</span></div><button class="cpbtn" id="cp-apex1"><i class="ti ti-copy" aria-hidden="true"></i> Copiar</button></div>
+        <div class="ctabs" id="tabs-apex1"></div>
+        <pre class="code" id="pre-apex1"></pre>
+      </div>
+    </div>
+
+    <!-- APEX 2 -->
+    <div class="sf-page" id="page-apex2">
+      <div class="sec-title"><i class="ti ti-arrow-up" aria-hidden="true" style="color:#F0935A;"></i> CaseEscalationService.cls - Escalacion automatica</div>
+      <p style="font-size:13px;color:var(--text-muted);margin-bottom:14px;line-height:1.7;">Cuando un caso lleva mas de X horas sin respuesta, este servicio lo escala: cambia el owner, notifica al manager por email y crea un registro de auditoria. Todo con DML bulk fuera de loops.</p>
+      <div class="code-panel">
+        <div class="code-hdr"><div style="display:flex;align-items:center;gap:10px;"><div class="cdots"><div class="cdot dr"></div><div class="cdot dy"></div><div class="cdot dg"></div></div><span class="cfname">CaseEscalationService.cls</span></div><button class="cpbtn" id="cp-apex2"><i class="ti ti-copy" aria-hidden="true"></i> Copiar</button></div>
+        <pre class="code" id="pre-apex2"></pre>
+      </div>
+    </div>
+
+    <!-- APEX 3 -->
+    <div class="sf-page" id="page-apex3">
+      <div class="sec-title"><i class="ti ti-stack" aria-hidden="true" style="color:#B09DD6;"></i> SlaMonitorBatch.cls - Batch programado cada 30 minutos</div>
+      <p style="font-size:13px;color:var(--text-muted);margin-bottom:14px;line-height:1.7;">Job que corre cada 30 minutos revisando todos los casos abiertos. Detecta los que estan por vencer el SLA y los escala proactivamente. Usa <strong style="color:var(--text);">Database.Stateful</strong> para contabilizar resultados.</p>
+      <div class="code-panel">
+        <div class="code-hdr"><div style="display:flex;align-items:center;gap:10px;"><div class="cdots"><div class="cdot dr"></div><div class="cdot dy"></div><div class="cdot dg"></div></div><span class="cfname">SlaMonitorBatch.cls</span></div><button class="cpbtn" id="cp-apex3"><i class="ti ti-copy" aria-hidden="true"></i> Copiar</button></div>
+        <pre class="code" id="pre-apex3"></pre>
+      </div>
+    </div>
+
+    <!-- METRICS -->
+    <div class="sf-page" id="page-metrics">
+      <div class="sec-title"><i class="ti ti-chart-bar" aria-hidden="true" style="color:#5DCAA5;"></i> Metricas del equipo de soporte</div>
+      <div class="stats-row" style="margin-bottom:20px;">
+        <div class="stat-card"><div class="slabel">Casos esta semana</div><div class="svalue" style="color:#60AFEE;">47</div><div class="sdelta up">+8% vs anterior</div></div>
+        <div class="stat-card"><div class="slabel">1er contacto resolucion</div><div class="svalue" style="color:#5DCAA5;">68%</div><div class="sdelta up">+5% este mes</div></div>
+        <div class="stat-card"><div class="slabel">NPS promedio</div><div class="svalue" style="color:#EF9F27;">74</div><div class="sdelta wn">Objetivo: 80</div></div>
+        <div class="stat-card"><div class="slabel">Tiempo 1ra respuesta</div><div class="svalue">1.8h</div><div class="sdelta up">SLA: 2h</div></div>
+      </div>
+      <div class="sec-title"><i class="ti ti-users" aria-hidden="true"></i> Rendimiento por agente</div>
+      <div class="tbl-wrap"><table>
+        <thead><tr><th>Agente</th><th>Casos resueltos</th><th>Tiempo medio</th><th>NPS</th><th>SLA cumplido</th><th>Rendimiento</th></tr></thead>
+        <tbody id="agents-body"></tbody>
+      </table></div>
+    </div>
+
+  </main>
+</div>
+
+<footer>
+  <div class="fl">service cloud demo - leandro picek - <span id="yr"></span></div>
+  <div style="display:flex;gap:8px;">
+    <a href="salesforce-demo.html" class="flink"><i class="ti ti-cloud" aria-hidden="true"></i> Salesforce Demo</a>
+    <a href="index.html" class="flink"><i class="ti ti-arrow-left" aria-hidden="true"></i> Portfolio</a>
+  </div>
+</footer>
+
+<script>
+document.getElementById('yr').textContent = new Date().getFullYear();
+
+function fakeDelay(ms) { return new Promise(function(r) { setTimeout(r, ms); }); }
+
+function esc(s) {
+  return (s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+/* Syntax highlight - comillas simples en todo, sin backticks */
+function hl(code) {
+  var s = esc(code);
+  var kws = ['public','private','global','static','void','class','return','new','null',
+             'true','false','if','else','for','while','try','catch','finally','throw',
+             'this','super','with','sharing','without','inherited'];
+  var tps = ['String','Integer','Decimal','Boolean','Id','List','Map','Set',
+             'DateTime','Date','System','Database','Messaging'];
+  var ans = ['@AuraEnabled','@InvocableMethod','@future','@IsTest','@TestSetup'];
+
+  kws.forEach(function(k) {
+    s = s.replace(new RegExp('\\b' + k + '\\b', 'g'), '<span class="kw">' + k + '</span>');
+  });
+  tps.forEach(function(t) {
+    s = s.replace(new RegExp('\\b' + t + '\\b', 'g'), '<span class="tp">' + t + '</span>');
+  });
+  ans.forEach(function(a) {
+    s = s.replace(new RegExp(a, 'g'), '<span class="an">' + a + '</span>');
+  });
+  s = s.replace(/(\/\/[^\n]*)/g, '<span class="cm">$1</span>');
+  s = s.replace(/('[^']*')/g, '<span class="st">$1</span>');
+  s = s.replace(/\b(\d+)\b/g, '<span class="nu">$1</span>');
+  return s;
+}
+
+function setCode(id, code) {
+  var el = document.getElementById(id);
+  if (el) el.innerHTML = hl(code);
+}
+
+function setTabs(cid, tabs, codes, preId, fnId) {
+  var c = document.getElementById(cid);
+  if (!c) return;
+  c.innerHTML = '';
+  tabs.forEach(function(tab, i) {
+    var btn = document.createElement('button');
+    btn.className = 'ctab' + (i === 0 ? ' active' : '');
+    btn.textContent = tab;
+    btn.addEventListener('click', function() {
+      c.querySelectorAll('.ctab').forEach(function(b) { b.classList.remove('active'); });
+      btn.classList.add('active');
+      setCode(preId, codes[i]);
+      if (fnId) document.getElementById(fnId).textContent = tabs[i];
+    });
+    c.appendChild(btn);
+  });
+  setCode(preId, codes[0]);
+}
+
+function setupCopy(btnId, preId) {
+  var btn = document.getElementById(btnId);
+  if (!btn) return;
+  btn.addEventListener('click', function() {
+    var pre = document.getElementById(preId);
+    if (!pre) return;
+    navigator.clipboard.writeText(pre.textContent).then(function() {
+      btn.innerHTML = '<i class="ti ti-check" aria-hidden="true"></i> Copiado!';
+      setTimeout(function() {
+        btn.innerHTML = '<i class="ti ti-copy" aria-hidden="true"></i> Copiar';
+      }, 2000);
+    });
+  });
+}
+
+function goPage(btn, id) {
+  document.querySelectorAll('.sb-btn').forEach(function(b) { b.classList.remove('active'); });
+  btn.classList.add('active');
+  document.querySelectorAll('.sf-page').forEach(function(p) { p.classList.remove('active'); });
+  var pg = document.getElementById('page-' + id);
+  if (pg) pg.classList.add('active');
+}
+
+/* CASES DATA */
+var CASES = [
+  {id:'00001', title:'Sistema de facturacion completamente caido', client:'TechCorp SA', contact:'Maria Gonzalez', cat:'Sistema critico', pr:'critical', st:'escalated', agent:'Soporte L3', sla:'1h', slaUsed:95, body:'El sistema de facturacion lleva 3 horas sin funcionar. Tenemos 500 empleados bloqueados y no podemos emitir facturas. Esto nos cuesta mucho dinero por hora. Necesitamos resolucion URGENTE. Ya escalo a la direccion.'},
+  {id:'00002', title:'No puedo acceder a mi cuenta desde ayer', client:'Innovar.io', contact:'Juan Perez', cat:'Acceso / Login', pr:'high', st:'open', agent:'Sofia M.', sla:'4h', slaUsed:60, body:'Desde ayer no puedo ingresar. Me dice contrasena incorrecta pero nunca la cambie. Probe distintos navegadores. Tengo una demo con cliente importante manyana a las 9am.'},
+  {id:'00003', title:'Error al exportar reportes a Excel', client:'GlobalMed', contact:'Ana Torres', cat:'Reportes', pr:'medium', st:'pending', agent:'Carlos R.', sla:'8h', slaUsed:30, body:'Cuando exporto a Excel el archivo aparece vacio. El PDF funciona bien. Lo necesitamos para la reunion del directorio del lunes.'},
+  {id:'00004', title:'Consulta sobre limite de usuarios en plan actual', client:'Startup AR', contact:'Roberto Lima', cat:'Facturacion', pr:'low', st:'open', agent:'Sin asignar', sla:'24h', slaUsed:15, body:'Hola, quisiera consultar cuantos usuarios puedo agregar en mi plan. Somos 8 y pronto sumamos 3 mas. Gracias.'},
+  {id:'00005', title:'Integracion con Slack dejo de funcionar', client:'DevTeam Norte', contact:'Laura Sanchez', cat:'Integraciones', pr:'high', st:'open', agent:'Marcos V.', sla:'4h', slaUsed:75, body:'Desde la actualizacion de la semana pasada las notificaciones de Slack dejaron de llegar. El webhook esta configurado correctamente pero no envia nada.'},
+  {id:'00006', title:'Solicitud de baja del servicio', client:'MiPyme SA', contact:'Diego Ruiz', cat:'Cuenta', pr:'high', st:'open', agent:'Sin asignar', sla:'2h', slaUsed:80, body:'Necesito dar de baja el servicio. No estamos conformes con la atencion y el precio ya no justifica el valor. Por favor indicarme el proceso de cancelacion.'}
+];
+
+function ppill(p) {
+  if (p === 'critical') return '<span class="pill p-crit">Critico</span>';
+  if (p === 'high')     return '<span class="pill p-high">Alto</span>';
+  if (p === 'medium')   return '<span class="pill p-med">Medio</span>';
+  return '<span class="pill p-low">Bajo</span>';
+}
+function spill(s) {
+  if (s === 'escalated') return '<span class="pill p-esc">Escalado</span>';
+  if (s === 'pending')   return '<span class="pill p-pend">Pendiente</span>';
+  if (s === 'resolved')  return '<span class="pill p-res">Resuelto</span>';
+  return '<span class="pill p-open">Abierto</span>';
+}
+function prClass(p) {
+  return p === 'critical' ? 'cpr-c' : p === 'high' ? 'cpr-h' : p === 'medium' ? 'cpr-m' : 'cpr-l';
+}
+
+function buildCaseList() {
+  var list = document.getElementById('case-list');
+  if (!list) return;
+  list.innerHTML = '';
+  CASES.forEach(function(c, idx) {
+    var row = document.createElement('div');
+    row.className = 'case-row';
+    row.setAttribute('data-idx', idx);
+    row.innerHTML =
+      '<div class="cpr ' + prClass(c.pr) + '"></div>' +
+      '<div class="cinfo">' +
+        '<div class="cheader">' +
+          '<span class="cnum">#' + c.id + '</span>' +
+          '<span class="ctitle">' + esc(c.title) + '</span>' +
+        '</div>' +
+        '<div class="cpreview">' + esc(c.body.slice(0, 100)) + '...</div>' +
+        '<div class="cmeta">' +
+          ppill(c.pr) + spill(c.st) +
+          '<span style="font-size:11px;color:var(--text-muted);">' + esc(c.client) + '</span>' +
+          '<span style="font-size:11px;color:var(--text-muted);">Agente: ' + esc(c.agent) + '</span>' +
+          '<span class="ctime">SLA: ' + esc(c.sla) + '</span>' +
+        '</div>' +
+      '</div>';
+    row.addEventListener('click', function() { openCase(idx, row); });
+    list.appendChild(row);
+  });
+}
+
+function openCase(idx, row) {
+  document.querySelectorAll('.case-row').forEach(function(r) { r.classList.remove('selected'); });
+  row.classList.add('selected');
+  var c = CASES[idx];
+  var det = document.getElementById('case-detail');
+  det.style.display = 'block';
+  document.getElementById('det-title').textContent = 'Case #' + c.id + ' - ' + c.title;
+  document.getElementById('det-meta').textContent = c.cat + ' | ' + c.client + ' | ' + c.contact;
+  document.getElementById('det-body').textContent = c.body;
+  document.getElementById('det-client').textContent = c.client + ' (' + c.contact + ')';
+  document.getElementById('det-agent').textContent = c.agent;
+  document.getElementById('det-cat').textContent = c.cat;
+  document.getElementById('det-sla').textContent = c.sla + ' restante (' + c.slaUsed + '% usado)';
+  det.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+function buildSlaTable() {
+  var tbody = document.getElementById('sla-body');
+  if (!tbody) return;
+  tbody.innerHTML = '';
+  var sorted = CASES.slice().sort(function(a, b) { return b.slaUsed - a.slaUsed; });
+  sorted.forEach(function(c) {
+    var bc = c.slaUsed >= 80 ? 's-cr' : c.slaUsed >= 60 ? 's-wn' : 's-ok';
+    var tr = document.createElement('tr');
+    tr.innerHTML =
+      '<td><span style="font-family:var(--font-mono);color:var(--text-muted);font-size:11px;">#' + c.id + '</span> ' + esc(c.title.slice(0, 30)) + '...</td>' +
+      '<td>' + esc(c.client) + '</td>' +
+      '<td>' + ppill(c.pr) + '</td>' +
+      '<td style="font-family:var(--font-mono);">' + c.sla + '</td>' +
+      '<td><div style="display:flex;align-items:center;gap:8px;"><div class="sla-bg"><div class="sla-bar ' + bc + '" style="width:' + c.slaUsed + '%;"></div></div><span style="font-size:11px;color:var(--text-muted);min-width:32px;">' + c.slaUsed + '%</span></div></td>' +
+      '<td>' + spill(c.st) + '</td>';
+    tbody.appendChild(tr);
+  });
+}
+
+function buildAgents() {
+  var tbody = document.getElementById('agents-body');
+  if (!tbody) return;
+  tbody.innerHTML = '';
+  var data = [
+    {name:'Sofia M.', cases:14, time:'1.2h', nps:92, sla:98},
+    {name:'Carlos R.', cases:11, time:'2.1h', nps:85, sla:91},
+    {name:'Marcos V.', cases:9,  time:'3.4h', nps:78, sla:82},
+    {name:'Laura F.', cases:13, time:'1.8h', nps:88, sla:95}
+  ];
+  data.forEach(function(a) {
+    var perf = a.sla >= 95
+      ? '<span class="pill p-res">Excelente</span>'
+      : a.sla >= 85
+        ? '<span class="pill p-med">Bueno</span>'
+        : '<span class="pill p-high">Mejorar</span>';
+    var tr = document.createElement('tr');
+    tr.innerHTML =
+      '<td style="font-weight:500;">' + esc(a.name) + '</td>' +
+      '<td style="font-family:var(--font-mono);">' + a.cases + '</td>' +
+      '<td>' + a.time + '</td>' +
+      '<td style="color:' + (a.nps >= 85 ? '#5DCAA5' : '#EF9F27') + ';">' + a.nps + '</td>' +
+      '<td>' + a.sla + '%</td>' +
+      '<td>' + perf + '</td>';
+    tbody.appendChild(tr);
+  });
+}
+
+/* IA ENGINES */
+function clasificar(text) {
+  var t = text.toLowerCase();
+  var score = 0;
+  var words = [];
+
+  if (/caido|down|no funciona|bloqueado|sin acceso|perdemos/.test(t))     { score += 40; words.push('lenguaje de emergencia detectado'); }
+  if (/facturacion|ingresos|ventas|dolares|cuesta|dinero/.test(t))         { score += 25; words.push('impacto economico mencionado'); }
+  if (/director|gerente|ceo|escalo/.test(t))                               { score += 10; words.push('ya escalo internamente'); }
+  if (/demo|cliente importante|reunion|manyana|produccion/.test(t))        { score += 15; words.push('operacion critica en riesgo'); }
+  if (/horas|dias|semana/.test(t))                                         { score += 10; words.push('problema persistente en el tiempo'); }
+
+  var m = t.match(/(\d+)\s*(empleados|usuarios|personas)/);
+  if (m && parseInt(m[1], 10) >= 100) { score += 20; words.push(parseInt(m[1], 10) + ' usuarios afectados'); }
+
+  score = Math.min(100, score);
+
+  var pr, sla, team, action, apex;
+  if (score >= 60) {
+    pr = 'CRITICO'; sla = '1 hora'; team = 'Soporte L3 + Escalacion al Manager';
+    action = 'Notificar al manager inmediatamente. Abrir bridge call con el cliente.';
+    apex = 'Asigna Priority=Critical, SLA=1h, Owner=SoporteL3Queue. Dispara CaseEscalationService.notifyManager().';
+  } else if (score >= 30) {
+    pr = 'ALTO'; sla = '4 horas'; team = 'Soporte L2';
+    action = 'Asignar a agente senior. Primera respuesta en 30 minutos.';
+    apex = 'Asigna Priority=High, SLA=4h, Owner=SoporteL2Queue. Crea Task de seguimiento a 2hs.';
+  } else if (score >= 10) {
+    pr = 'MEDIO'; sla = '8 horas'; team = 'Soporte L1';
+    action = 'Cola de soporte L1. Respuesta dentro del horario laboral.';
+    apex = 'Asigna Priority=Medium, SLA=8h, Owner=SoporteL1Queue.';
+  } else {
+    pr = 'BAJO'; sla = '24 horas'; team = 'Soporte L1 / Self-service';
+    action = 'Dirigir a Knowledge Base. Respuesta en 1 dia laboral.';
+    apex = 'Asigna Priority=Low, SLA=24h. Envia articulos de Knowledge automaticamente.';
+  }
+
+  var out = 'CLASIFICACION: ' + pr + ' (Score: ' + score + '/100)\n';
+  out += 'SLA asignado: ' + sla + '\n';
+  out += 'Equipo: ' + team + '\n\n';
+  out += 'Senales detectadas:\n';
+  if (words.length > 0) {
+    words.forEach(function(w, i) { out += '  ' + (i + 1) + '. ' + w + '\n'; });
+  } else {
+    out += '  Ninguna senal de alta urgencia\n';
+  }
+  out += '\nAccion recomendada:\n' + action + '\n\n';
+  out += 'Lo que hace el Apex en produccion:\n' + apex;
+  return out;
+}
+
+function responder(caseDesc, context) {
+  var t = (caseDesc || '').toLowerCase();
+  var ctx = (context || '').toLowerCase();
+  var isPremium = ctx.indexOf('premium') >= 0 || ctx.indexOf('enterprise') >= 0;
+  var greeting = isPremium ? 'Estimado cliente Premium,\n\n' : 'Estimado cliente,\n\n';
+  var body;
+
+  if (/caido|down|no funciona|bloqueado/.test(t)) {
+    body = 'Entendemos la urgencia de su situacion y lamentamos los inconvenientes. Este tipo de interrupciones son nuestra maxima prioridad.\n\n' +
+           'Hemos escalado su caso al equipo de Soporte L3. Para agilizar el proceso, necesitamos:\n' +
+           '- El mensaje de error exacto que esta viendo\n' +
+           '- El navegador y version que utiliza\n' +
+           '- Si otros usuarios de su organizacion tienen el mismo problema\n\n' +
+           'Estaremos en contacto en los proximos 30 minutos con una actualizacion.';
+  } else if (/acceso|contrasena|login/.test(t)) {
+    body = 'Le hemos generado un enlace de restablecimiento de contrasena que llegara a su email registrado en los proximos 5 minutos.\n\n' +
+           'Si no lo recibe, revise la carpeta de spam. Si el problema persiste, nuestro equipo puede conectarse de forma remota para asistirle directamente.';
+  } else if (/reporte|excel|exportar/.test(t)) {
+    body = 'Hemos identificado el inconveniente con la exportacion a Excel. Como solucion temporal puede usar el formato CSV que funciona correctamente.\n\n' +
+           'Nuestro equipo tiene programado el fix para el proximo martes. Le notificaremos cuando este disponible.';
+  } else if (/baja|cancelar/.test(t)) {
+    body = 'Lamentamos escuchar que considera darse de baja. Su satisfaccion es muy importante para nosotros.\n\n' +
+           'Antes de proceder, nuestro equipo de Customer Success se comunicara en las proximas 2 horas para escuchar sus inquietudes y explorar opciones.';
+  } else {
+    body = 'Hemos recibido su consulta y la estamos atendiendo. Le brindaremos una respuesta detallada dentro del plazo de SLA comprometido.';
+  }
+
+  var premium = isPremium ? '\n\nComo cliente Premium tiene acceso a soporte prioritario las 24hs.' : '';
+  return greeting + body + premium + '\n\nSaludos cordiales,\nEquipo de Soporte';
+}
+
+function sentimiento(text) {
+  var t = (text || '').toLowerCase();
+  var neg = 0; var pos = 0; var churn = 0; var sigs = [];
+
+  var strongNeg = ['furioso','inaceptable','vergonzoso','pesimo','nunca mas','horrible','muy mal'];
+  strongNeg.forEach(function(w) { if (t.indexOf(w) >= 0) { neg += 25; sigs.push('Lenguaje muy negativo: ' + w); } });
+  var modNeg = ['mal','error','problema','no funciona','falla','sin respuesta','espere','dias','semanas'];
+  modNeg.forEach(function(w) { if (t.indexOf(w) >= 0) { neg += 8; } });
+  var positive = ['gracias','excelente','rapido','soluciono','perfecto','conforme','contento'];
+  positive.forEach(function(w) { if (t.indexOf(w) >= 0) { pos += 15; } });
+
+  if (/baja|cancelar|otro proveedor|competencia/.test(t)) { churn += 50; sigs.push('Mencion directa de cancelacion o competencia'); }
+  if (/caro|precio|no justifica/.test(t))                 { churn += 20; sigs.push('Queja sobre precio o valor percibido'); }
+  if (/director|gerente|ceo/.test(t))                     { churn += 15; sigs.push('Involucramiento de decision-maker'); }
+
+  neg = Math.min(100, neg); pos = Math.min(100, pos); churn = Math.min(100, churn);
+
+  var sent = neg >= 60 ? 'MUY NEGATIVO' : neg >= 30 ? 'NEGATIVO' : pos >= 40 ? 'POSITIVO' : 'NEUTRO';
+  var accion = neg >= 60
+    ? 'Accion inmediata. Notificar a Customer Success y asignar agente senior.'
+    : neg >= 30
+      ? 'Priorizar respuesta empatica con solucion concreta en el primer contacto.'
+      : 'Respuesta estandar. Monitorear proximas interacciones.';
+  var churnLabel = churn >= 50 ? 'ALTO' : churn >= 25 ? 'MEDIO' : 'BAJO';
+  var churnFlag  = churn >= 50 ? '[URGENTE]' : churn >= 25 ? '[CUIDADO]' : '[OK]';
+
+  var out = 'SENTIMIENTO: ' + sent + '\n';
+  out += 'Score negativo: ' + neg + '/100 | Score positivo: ' + pos + '/100\n\n';
+  out += 'RIESGO DE CHURN: ' + churnLabel + ' (' + churn + '%) ' + churnFlag + '\n\n';
+  if (sigs.length > 0) {
+    out += 'Senales detectadas:\n';
+    sigs.forEach(function(s, i) { out += '  ' + (i + 1) + '. ' + s + '\n'; });
+    out += '\n';
+  }
+  out += 'Accion recomendada:\n' + accion + '\n\n';
+  out += 'Lo que hace el Apex en produccion:\n';
+  if (churn >= 50) {
+    out += 'Actualiza Churn_Risk__c=High en Account. Notifica a Customer Success Manager. Crea Task urgente.';
+  } else if (neg >= 60) {
+    out += 'Actualiza Case.Customer_Sentiment__c=Very_Negative. Asigna a cola de agentes senior.';
+  } else {
+    out += 'Registra sentiment score en Case. Sin escalacion necesaria.';
+  }
+  return out;
+}
+
+/* APEX CODE — pure string concatenation, no backticks, no escaped quotes */
+var APEX1_TABS = ['CaseTrigger.trigger', 'CaseClassificationService.cls', 'CaseAssignmentRules.cls'];
+var APEX1_CODES = [
+
+  'trigger CaseTrigger on Case (\n' +
+  '    before insert, before update,\n' +
+  '    after insert, after update\n' +
+  ') {\n' +
+  '    CaseTriggerHandler handler = new CaseTriggerHandler();\n' +
+  '    if (Trigger.isBefore) {\n' +
+  '        if (Trigger.isInsert) handler.beforeInsert(Trigger.new);\n' +
+  '        if (Trigger.isUpdate) handler.beforeUpdate(Trigger.new, Trigger.oldMap);\n' +
+  '    }\n' +
+  '    if (Trigger.isAfter) {\n' +
+  '        if (Trigger.isInsert) handler.afterInsert(Trigger.new);\n' +
+  '        if (Trigger.isUpdate) handler.afterUpdate(Trigger.new, Trigger.oldMap);\n' +
+  '    }\n' +
+  '}',
+
+  'public with sharing class CaseClassificationService {\n\n' +
+  '    private static final Set<String> CRITICAL_KW = new Set<String>{\n' +
+  "        'caido','down','bloqueado','sin acceso','perdemos'\n" +
+  '    };\n' +
+  '    private static final Set<String> HIGH_KW = new Set<String>{\n' +
+  "        'urgente','importante','demo','director','produccion'\n" +
+  '    };\n\n' +
+  '    public static void classifyCases(List<Case> cases) {\n' +
+  '        for (Case c : cases) {\n' +
+  '            if (c.Description == null) continue;\n' +
+  '            String desc = c.Description.toLowerCase();\n' +
+  '            Integer score = 0;\n' +
+  '            for (String kw : CRITICAL_KW) {\n' +
+  '                if (desc.contains(kw)) score += 30;\n' +
+  '            }\n' +
+  '            for (String kw : HIGH_KW) {\n' +
+  '                if (desc.contains(kw)) score += 15;\n' +
+  '            }\n' +
+  '            if (score >= 60) {\n' +
+  "                c.Priority    = 'Critical';\n" +
+  '                c.SlaExitDate = DateTime.now().addHours(1);\n' +
+  '            } else if (score >= 30) {\n' +
+  "                c.Priority    = 'High';\n" +
+  '                c.SlaExitDate = DateTime.now().addHours(4);\n' +
+  '            } else if (score >= 10) {\n' +
+  "                c.Priority    = 'Medium';\n" +
+  '                c.SlaExitDate = DateTime.now().addHours(8);\n' +
+  '            } else {\n' +
+  "                c.Priority    = 'Low';\n" +
+  '                c.SlaExitDate = DateTime.now().addHours(24);\n' +
+  '            }\n' +
+  '            c.Urgency_Score__c = score;\n' +
+  '        }\n' +
+  '    }\n' +
+  '}',
+
+  'public with sharing class CaseAssignmentRules {\n\n' +
+  '    private static final Map<String, String> QUEUE_MAP =\n' +
+  '        new Map<String, String>{\n' +
+  "            'Sistema critico' => 'SoporteL3Queue',\n" +
+  "            'Integraciones'   => 'SoporteL2Queue',\n" +
+  "            'Acceso / Login'  => 'SoporteL1Queue',\n" +
+  "            'Facturacion'     => 'BillingQueue',\n" +
+  "            'Reportes'        => 'SoporteL1Queue'\n" +
+  '        };\n\n' +
+  '    public static void assignCases(List<Case> cases) {\n' +
+  '        Map<String, Id> queueIds = new Map<String, Id>();\n' +
+  '        for (Group q : [\n' +
+  '            SELECT Id, DeveloperName FROM Group\n' +
+  "            WHERE Type = 'Queue'\n" +
+  '            AND DeveloperName IN :QUEUE_MAP.values()\n' +
+  '        ]) {\n' +
+  '            queueIds.put(q.DeveloperName, q.Id);\n' +
+  '        }\n' +
+  '        for (Case c : cases) {\n' +
+  '            String qName = QUEUE_MAP.get(c.Type);\n' +
+  '            if (qName != null && queueIds.containsKey(qName)) {\n' +
+  '                c.OwnerId = queueIds.get(qName);\n' +
+  '            }\n' +
+  '        }\n' +
+  '    }\n' +
+  '}'
+];
+
+var APEX2_CODE =
+  'public with sharing class CaseEscalationService {\n\n' +
+  '    public static void escalateCases(List<Case> cases) {\n' +
+  '        if (cases.isEmpty()) return;\n\n' +
+  '        Set<Id> ownerIds = new Set<Id>();\n' +
+  '        for (Case c : cases) ownerIds.add(c.OwnerId);\n\n' +
+  '        Map<Id, User> userMap = new Map<Id, User>([\n' +
+  '            SELECT Id, Name, ManagerId, Manager.Email\n' +
+  '            FROM User WHERE Id IN :ownerIds\n' +
+  '        ]);\n\n' +
+  '        List<Case> toUpdate          = new List<Case>();\n' +
+  '        List<Task> tasksToCreate     = new List<Task>();\n' +
+  '        List<Escalation_Log__c> logs = new List<Escalation_Log__c>();\n\n' +
+  '        for (Case c : cases) {\n' +
+  '            User agent = userMap.get(c.OwnerId);\n\n' +
+  "            c.Status               = 'Escalated';\n" +
+  "            c.Priority             = 'Critical';\n" +
+  "            c.Escalation_Reason__c = 'SLA breach - auto escalation';\n" +
+  '            toUpdate.add(c);\n\n' +
+  '            if (agent != null && agent.ManagerId != null) {\n' +
+  '                tasksToCreate.add(new Task(\n' +
+  "                    Subject      = 'ESCALADO: Case #' + c.CaseNumber,\n" +
+  '                    WhatId       = c.Id,\n' +
+  '                    OwnerId      = agent.ManagerId,\n' +
+  "                    Priority     = 'High',\n" +
+  "                    Status       = 'Not Started',\n" +
+  '                    ActivityDate = Date.today()\n' +
+  '                ));\n' +
+  '            }\n\n' +
+  '            logs.add(new Escalation_Log__c(\n' +
+  '                Case__c           = c.Id,\n' +
+  '                Previous_Owner__c = c.OwnerId,\n' +
+  '                Escalated_At__c   = DateTime.now(),\n' +
+  "                Reason__c         = 'Automatic SLA escalation'\n" +
+  '            ));\n' +
+  '        }\n\n' +
+  '        // DML bulk fuera del loop\n' +
+  '        if (!toUpdate.isEmpty())      update toUpdate;\n' +
+  '        if (!tasksToCreate.isEmpty()) insert tasksToCreate;\n' +
+  '        if (!logs.isEmpty())          insert logs;\n\n' +
+  '        notifyManagers(cases, userMap);\n' +
+  '    }\n\n' +
+  '    private static void notifyManagers(\n' +
+  '        List<Case> cases, Map<Id, User> userMap\n' +
+  '    ) {\n' +
+  '        List<Messaging.SingleEmailMessage> emails =\n' +
+  '            new List<Messaging.SingleEmailMessage>();\n\n' +
+  '        for (Case c : cases) {\n' +
+  '            User agent = userMap.get(c.OwnerId);\n' +
+  '            if (agent == null || agent.ManagerId == null) continue;\n' +
+  '            Messaging.SingleEmailMessage email =\n' +
+  '                new Messaging.SingleEmailMessage();\n' +
+  '            email.setTargetObjectId(agent.ManagerId);\n' +
+  "            email.setSubject('ESCALACION AUTOMATICA: Case #' + c.CaseNumber);\n" +
+  "            email.setPlainTextBody('Case ' + c.CaseNumber + ' fue escalado.\\n' +\n" +
+  "                'Agente previo: ' + agent.Name + '\\n' +\n" +
+  "                'Accion requerida: Contactar al cliente inmediatamente.');\n" +
+  '            emails.add(email);\n' +
+  '        }\n' +
+  '        if (!emails.isEmpty()) Messaging.sendEmail(emails);\n' +
+  '    }\n' +
+  '}';
+
+var APEX3_CODE =
+  'public class SlaMonitorBatch\n' +
+  '    implements Database.Batchable<SObject>, Database.Stateful {\n\n' +
+  '    private Integer escalatedCount = 0;\n' +
+  '    private Integer warningCount   = 0;\n' +
+  '    private final DateTime runTime = DateTime.now();\n\n' +
+  '    public Database.QueryLocator start(Database.BatchableContext ctx) {\n' +
+  '        return Database.getQueryLocator([\n' +
+  '            SELECT Id, CaseNumber, Status, Priority,\n' +
+  '                   OwnerId, SlaExitDate,\n' +
+  '                   Escalation_Warning_Sent__c\n' +
+  '            FROM Case\n' +
+  "            WHERE Status NOT IN ('Closed', 'Resolved')\n" +
+  '            AND   SlaExitDate != null\n' +
+  '            ORDER BY SlaExitDate ASC\n' +
+  '        ]);\n' +
+  '    }\n\n' +
+  '    public void execute(\n' +
+  '        Database.BatchableContext ctx,\n' +
+  '        List<Case> cases\n' +
+  '    ) {\n' +
+  '        List<Case> toEscalate = new List<Case>();\n' +
+  '        List<Case> toWarn     = new List<Case>();\n\n' +
+  '        for (Case c : cases) {\n' +
+  '            Long minsLeft =\n' +
+  '                (c.SlaExitDate.getTime() - runTime.getTime()) / 60000;\n' +
+  '            if (minsLeft <= 0) {\n' +
+  '                toEscalate.add(c); escalatedCount++;\n' +
+  '            } else if (minsLeft <= 30 && !c.Escalation_Warning_Sent__c) {\n' +
+  '                toWarn.add(c); warningCount++;\n' +
+  '            }\n' +
+  '        }\n' +
+  '        if (!toEscalate.isEmpty())\n' +
+  '            CaseEscalationService.escalateCases(toEscalate);\n' +
+  '        if (!toWarn.isEmpty()) {\n' +
+  '            for (Case c : toWarn) c.Escalation_Warning_Sent__c = true;\n' +
+  '            update toWarn;\n' +
+  '        }\n' +
+  '    }\n\n' +
+  '    public void finish(Database.BatchableContext ctx) {\n' +
+  "        System.debug('Escalados: ' + escalatedCount + ', Warnings: ' + warningCount);\n" +
+  '        DateTime next = DateTime.now().addMinutes(30);\n' +
+  "        String cron = next.second() + ' ' + next.minute() + ' ' +\n" +
+  "                      next.hour()   + ' ' + next.day()    + ' ' +\n" +
+  "                      next.month()  + ' ? ' + next.year();\n" +
+  "        System.schedule('SLA Monitor ' + DateTime.now().format(), cron, new SlaMonitorScheduler());\n" +
+  '    }\n' +
+  '}';
+
+/* DOM READY */
+document.addEventListener('DOMContentLoaded', function() {
+
+  document.querySelectorAll('.sb-btn[data-pg]').forEach(function(btn) {
+    btn.addEventListener('click', function() { goPage(btn, btn.getAttribute('data-pg')); });
+  });
+
+  buildCaseList();
+  buildSlaTable();
+  buildAgents();
+
+  setTabs('tabs-apex1', APEX1_TABS, APEX1_CODES, 'pre-apex1', 'fn-apex1');
+  setCode('pre-apex2', APEX2_CODE);
+  setCode('pre-apex3', APEX3_CODE);
+
+  setupCopy('cp-apex1', 'pre-apex1');
+  setupCopy('cp-apex2', 'pre-apex2');
+  setupCopy('cp-apex3', 'pre-apex3');
+
+  /* AI buttons */
+  document.getElementById('btn-classify').addEventListener('click', async function() {
+    var txt = document.getElementById('cl-input').value.trim();
+    if (!txt) { document.getElementById('cl-input').focus(); return; }
+    var th = document.getElementById('cl-think'), res = document.getElementById('cl-res'), t = document.getElementById('cl-txt');
+    th.classList.add('on'); res.classList.remove('on'); t.textContent = '';
+    await fakeDelay(1200 + Math.floor(Math.random() * 400));
+    th.classList.remove('on'); t.textContent = clasificar(txt); res.classList.add('on');
+  });
+
+  document.getElementById('btn-respond').addEventListener('click', async function() {
+    var cd = document.getElementById('rp-case').value.trim();
+    if (!cd) { document.getElementById('rp-case').focus(); return; }
+    var th = document.getElementById('rp-think'), res = document.getElementById('rp-res'), t = document.getElementById('rp-txt');
+    th.classList.add('on'); res.classList.remove('on'); t.textContent = '';
+    await fakeDelay(1400 + Math.floor(Math.random() * 500));
+    th.classList.remove('on'); t.textContent = responder(cd, document.getElementById('rp-ctx').value); res.classList.add('on');
+  });
+
+  document.getElementById('btn-sent').addEventListener('click', async function() {
+    var txt = document.getElementById('sn-input').value.trim();
+    if (!txt) { document.getElementById('sn-input').focus(); return; }
+    var th = document.getElementById('sn-think'), res = document.getElementById('sn-res'), t = document.getElementById('sn-txt');
+    th.classList.add('on'); res.classList.remove('on'); t.textContent = '';
+    await fakeDelay(1100 + Math.floor(Math.random() * 400));
+    th.classList.remove('on'); t.textContent = sentimiento(txt); res.classList.add('on');
+  });
+
+  /* Fill examples */
+  document.getElementById('btn-ex-crit').addEventListener('click', function() {
+    document.getElementById('cl-input').value = 'El sistema de facturacion lleva 3 horas completamente caido. Tenemos 500 empleados bloqueados y no podemos emitir facturas. Perdemos muchisimo dinero. Necesitamos solucion URGENTE. Ya escalo a la direccion.';
+  });
+  document.getElementById('btn-ex-norm').addEventListener('click', function() {
+    document.getElementById('cl-input').value = 'Hola, queria consultar si es posible cambiar el dia de facturacion mensual. Actualmente me debita el 5 y me seria mas comodo el 15. Gracias.';
+  });
+  document.getElementById('btn-ex-resp').addEventListener('click', function() {
+    document.getElementById('rp-case').value = 'No puedo acceder a mi cuenta desde ayer. Me dice contrasena incorrecta pero nunca la cambie.';
+    document.getElementById('rp-ctx').value  = 'Cliente Premium, 3 anos de contrato, primer incidente reportado.';
+  });
+  document.getElementById('btn-ex-sent').addEventListener('click', function() {
+    document.getElementById('sn-input').value = 'Tercer vez que tengo el mismo problema este mes. Nadie me da una respuesta concreta. Esto es inaceptable para lo que pago. Si no se soluciona esta semana voy a cancelar el contrato y busco otro proveedor.';
+  });
+
+  /* Resolve / Escalate */
+  document.getElementById('btn-res').addEventListener('click', function() {
+    var sel = document.querySelector('.case-row.selected');
+    if (!sel) return;
+    CASES[parseInt(sel.getAttribute('data-idx'), 10)].st = 'resolved';
+    buildCaseList();
+    document.getElementById('case-detail').style.display = 'none';
+    buildSlaTable();
+  });
+  document.getElementById('btn-esc').addEventListener('click', function() {
+    var sel = document.querySelector('.case-row.selected');
+    if (!sel) return;
+    var idx = parseInt(sel.getAttribute('data-idx'), 10);
+    CASES[idx].st = 'escalated'; CASES[idx].pr = 'critical';
+    buildCaseList();
+    document.getElementById('case-detail').style.display = 'none';
+    buildSlaTable();
+  });
+
+});
+
+</script>
+</body>
+</html>
