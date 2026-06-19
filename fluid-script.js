@@ -1472,12 +1472,14 @@ canvas.addEventListener('mousedown', e => {
     updatePointerDownData(pointer, -1, posX, posY);
 });
 
-canvas.addEventListener('mousemove', e => {
+window.addEventListener('mousemove', e => {
     let pointer = pointers[0];
-    let posX = scaleByPixelRatio(e.offsetX);
-    let posY = scaleByPixelRatio(e.offsetY);
-    // Si el pointer no fue inicializado por un click, lo activamos aca
-    // para que el fluido reaccione con solo mover el mouse.
+    // Usamos clientX/clientY (relativos a la ventana) en lugar de offsetX/offsetY,
+    // porque el evento ahora se escucha en window, no en el canvas. Esto permite
+    // que el fluido reaccione aunque el canvas tenga pointer-events: none.
+    let rect = canvas.getBoundingClientRect();
+    let posX = scaleByPixelRatio(e.clientX - rect.left);
+    let posY = scaleByPixelRatio(e.clientY - rect.top);
     if (!pointer.down) {
         updatePointerDownData(pointer, -1, posX, posY);
     }
@@ -1649,4 +1651,4 @@ function hashCode (s) {
         hash |= 0; // Convert to 32bit integer
     }
     return hash;
-}; 
+};
