@@ -157,13 +157,17 @@
     left: 0;
     width: 100vw;
     height: 100vh;
-    z-index: -1;          /* detras de todo el contenido */
+    z-index: 0;           /* capa de fondo */
     pointer-events: none; /* deja pasar los clicks a links y botones */
   }
-  /* El body es transparente sobre el canvas, pero mantenemos
-     el color de fondo en html para que no se vea blanco al hacer scroll */
+  /* El html mantiene el color de fondo; el body es transparente
+     para que se vea el canvas detras del contenido. */
   html { background: var(--bg); }
-  body { background: transparent; }
+  body { background: transparent; position: relative; }
+  /* Todo el contenido directo del body se eleva por encima del canvas. */
+  body > nav,
+  body > section,
+  body > footer { position: relative; z-index: 1; }
 
   /* RESPONSIVE */
   @media (max-width: 640px) {
