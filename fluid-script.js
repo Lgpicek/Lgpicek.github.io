@@ -49,7 +49,7 @@ let config = {
     BLOOM: true,
     BLOOM_ITERATIONS: 8,
     BLOOM_RESOLUTION: 256,
-    BLOOM_INTENSITY: 0.3,
+    BLOOM_INTENSITY: 0.1,
     BLOOM_THRESHOLD: 0.1,
     BLOOM_SOFT_KNEE: 0.7,
     SUNRAYS: true,
@@ -1577,9 +1577,9 @@ function generateColor () {
     let hue = 0.33 + Math.random() * 0.19;   // entre 0.33 (verde) y 0.52 (celeste)
     let sat = 0.55 + Math.random() * 0.25;   // saturacion media: colores menos electricos
     let c = HSVtoRGB(hue, sat, 1.0);
-    c.r *= 0.15;
-    c.g *= 0.15;
-    c.b *= 0.15;
+    c.r *= 0.08; 
+    c.g *= 0.08;
+    c.b *= 0.08;
     return c;
 }
 
