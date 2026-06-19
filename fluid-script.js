@@ -1649,4 +1649,4 @@ function hashCode (s) {
         hash |= 0; // Convert to 32bit integer
     }
     return hash;
-};
+}; 
