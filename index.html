@@ -150,6 +150,21 @@
 
   .hidden { display: none !important; }
 
+  /* ─── Canvas de fluido (fondo interactivo) ─── */
+  #fluid {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: -1;          /* detras de todo el contenido */
+    pointer-events: none; /* deja pasar los clicks a links y botones */
+  }
+  /* El body es transparente sobre el canvas, pero mantenemos
+     el color de fondo en html para que no se vea blanco al hacer scroll */
+  html { background: var(--bg); }
+  body { background: transparent; }
+
   /* RESPONSIVE */
   @media (max-width: 640px) {
     .about-grid, .edu-grid { grid-template-columns: 1fr; gap: 2rem; }
@@ -167,6 +182,8 @@
 </style>
 </head>
 <body>
+
+<canvas id="fluid"></canvas>
 
 <nav id="navbar">
   <a class="nav-logo" href="#hero">&gt; leandro.picek</a>
@@ -568,5 +585,8 @@
     }
   });
 </script>
+
+<!-- Efecto de fluido WebGL (Pavel Dobryakov, MIT) -->
+<script src="./fluid-script.js"></script>
 </body>
 </html>
