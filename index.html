@@ -157,11 +157,12 @@
     left: 0;
     width: 100vw;
     height: 100vh;
-    z-index: 0;           /* capa de fondo */
+    z-index: 0;           /* capa de fondo, detras del contenido */
     pointer-events: none; /* deja pasar los clicks a links y botones */
+    background: var(--bg); /* fondo oscuro detras del fluido (sin cuadritos) */
   }
-  /* El html mantiene el color de fondo; el body es transparente
-     para que se vea el canvas detras del contenido. */
+  /* El html mantiene el color de fondo oscuro de respaldo. El body queda
+     transparente para dejar ver el canvas (que ya tiene su propio fondo negro). */
   html { background: var(--bg); }
   body { background: transparent; position: relative; }
   /* Todo el contenido directo del body se eleva por encima del canvas. */

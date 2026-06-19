@@ -1571,7 +1571,12 @@ function correctDeltaY (delta) {
 }
 
 function generateColor () {
-    let c = HSVtoRGB(Math.random(), 1.0, 1.0);
+    // Paleta restringida al tema del portfolio: verde manzana -> celeste grisaceo.
+    // En HSV, el hue (matiz) va de 0 a 1: verde ~0.33, cian/celeste ~0.5.
+    // Limitamos el rango y bajamos la saturacion para un look mas sobrio.
+    let hue = 0.33 + Math.random() * 0.19;   // entre 0.33 (verde) y 0.52 (celeste)
+    let sat = 0.55 + Math.random() * 0.25;   // saturacion media: colores menos electricos
+    let c = HSVtoRGB(hue, sat, 1.0);
     c.r *= 0.15;
     c.g *= 0.15;
     c.b *= 0.15;
