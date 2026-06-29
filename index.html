@@ -398,6 +398,7 @@
     <button class="tech-tab" onclick="filterProjects('oracle', this)">oracle · pl/sql</button>
     <button class="tech-tab" onclick="filterProjects('python', this)">python</button>
     <button class="tech-tab" onclick="filterProjects('php', this)">php</button>
+    <button class="tech-tab" onclick="filterProjects('vue', this)">vue · ia</button>
   </div>
 
   <div class="projects-grid" id="projects-grid">
@@ -421,7 +422,7 @@
       </div>
     </div>
 
-   <div class="project-card featured" data-tech="servicecloud" style="margin-top:10px;">
+   <div class="project-card featured" data-tech="salesforce servicecloud" style="margin-top:10px;">
       <div class="project-icon" style="background:rgba(46,132,74,0.12);color:#5DCAA5;"><i class="ti ti-headset" aria-hidden="true"></i></div>
       <div style="flex:1; display:flex; flex-direction:column; gap:10px;">
         <div style="display:flex; align-items:center; gap:8px;">
@@ -456,6 +457,25 @@
         <i class="ti ti-external-link" aria-hidden="true"></i> Ver demo
       </a>
      </div>
+    </div>
+
+    <div class="project-card featured" data-tech="oracle tron">
+      <div class="project-icon"><i class="ti ti-currency-bitcoin" aria-hidden="true"></i></div>
+      <div style="flex:1; display:flex; flex-direction:column; gap:10px;">
+        <div style="display:flex; align-items:center; gap:8px;">
+          <span class="project-badge">ORACLE · PL/SQL · TRON</span>
+          <div class="project-status"><div class="dot-live"></div> demo disponible</div>
+        </div>
+        <div class="project-name">TRON On-Chain Indexer (PL/SQL)</div>
+        <div class="project-desc">Backend Oracle que indexa transacciones de la blockchain TRON (TRX y tokens TRC-20 como USDT) con PL/SQL como motor: ingesta masiva con BULK COLLECT/FORALL, parsing con JSON_TABLE, packages, analítica con funciones window y un módulo de scoring AML. TronWeb trae datos on-chain reales en modo live.</div>
+        <div class="project-tags">
+          <span class="tag">PL/SQL</span><span class="tag">Oracle 19c</span><span class="tag">JSON_TABLE</span>
+          <span class="tag">BULK COLLECT</span><span class="tag">TronWeb</span><span class="tag">AML</span><span class="tag">ORDS</span>
+        </div>
+        <a href="tron-demo.html" class="btn btn-primary" style="margin-top:4px; width:fit-content; font-size:13px; padding:8px 18px;">
+          <i class="ti ti-external-link" aria-hidden="true"></i> Ver demo
+        </a>
+      </div>
     </div>
 
     <div class="project-card" data-tech="oracle">
@@ -515,7 +535,7 @@
       <a href="https://www.linkedin.com/in/leandro-gustavo-picek/" target="_blank" rel="noopener" class="btn btn-outline">
         <i class="ti ti-brand-linkedin" aria-hidden="true"></i> LinkedIn
       </a>
-      <a href="https://github.com/leandropicek" target="_blank" rel="noopener" class="btn btn-outline">
+      <a href="https://github.com/Lgpicek" target="_blank" rel="noopener" class="btn btn-outline">
         <i class="ti ti-brand-github" aria-hidden="true"></i> GitHub
       </a>
       <a href="tel:+5493764229638" class="btn btn-outline">
@@ -570,12 +590,13 @@
   const sl = document.getElementById('skills-list');
   if (sl) skillObs.observe(sl);
 
-  // Project filter
+  // Project filter — data-tech admite varias etiquetas separadas por espacio
   function filterProjects(tech, btn) {
     document.querySelectorAll('.tech-tab').forEach(t => t.classList.remove('active'));
     btn.classList.add('active');
     document.querySelectorAll('.project-card').forEach(card => {
-      card.classList.toggle('hidden', tech !== 'all' && card.dataset.tech !== tech);
+      const techs = (card.dataset.tech || '').split(/\s+/);
+      card.classList.toggle('hidden', tech !== 'all' && !techs.includes(tech));
     });
   }
 

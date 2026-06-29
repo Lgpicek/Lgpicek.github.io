@@ -843,13 +843,13 @@
             </div>
             <div id="agent-chat" style="min-height:160px;max-height:220px;overflow-y:auto;margin-bottom:10px;display:flex;flex-direction:column;gap:8px;padding:4px 0;"></div>
             <div style="display:flex;gap:6px;">
-              <input class="ai-inp" id="agent-input" type="text" placeholder="Ej: ¿Cuántos leads hot tenemos hoy?" style="flex:1;" id="agent-input">
+              <input class="ai-inp" id="agent-input" type="text" placeholder="Ej: ¿Cuántos leads hot tenemos hoy?" style="flex:1;">
               <button class="btn-ai" id="btn-agent" style="padding:7px 14px;white-space:nowrap;"><i class="ti ti-send" aria-hidden="true"></i></button>
             </div>
             <div style="margin-top:8px;display:flex;gap:5px;flex-wrap:wrap;">
-              <button class="btn-ghost" style="font-size:11px;padding:4px 8px;" onclick="setAgentQ('¿Cuántas oportunidades cerré este mes?')">Oportunidades del mes</button>
+              <button class="btn-ghost" style="font-size:11px;padding:4px 8px;" data-q="¿Cuántas oportunidades cerré este mes?">Oportunidades del mes</button>
               <button class="btn-ghost" style="font-size:11px;padding:4px 8px;" data-q="Resume el pipeline de ventas actual">Pipeline actual</button>
-              <button class="btn-ghost" style="font-size:11px;padding:4px 8px;" onclick="setAgentQ('¿Qué leads necesitan seguimiento urgente?')">Leads urgentes</button>
+              <button class="btn-ghost" style="font-size:11px;padding:4px 8px;" data-q="¿Qué leads necesitan seguimiento urgente?">Leads urgentes</button>
             </div>
           </div>
           <div class="ai-panel" style="border-color:rgba(240,200,66,.25);">
